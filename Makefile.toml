@@ -1,0 +1,86 @@
+[config]
+default_to_workspace = false
+skip_core_tasks = false
+
+[tasks.check]
+description = "Run the deterministic containerless default gate"
+command = "./scripts/ci-local.sh"
+
+[tasks.ci]
+alias = "check"
+
+[tasks.build]
+description = "Build the native product package"
+command = "cargo"
+args = ["build", "--locked", "--workspace"]
+
+[tasks.test]
+description = "Run native deterministic and documentation tests"
+dependencies = ["test-native", "test-doc"]
+
+[tasks.test-native]
+command = "cargo"
+args = ["test", "--locked", "--workspace", "--lib", "--tests"]
+
+[tasks.test-doc]
+command = "cargo"
+args = ["test", "--locked", "--workspace", "--doc"]
+
+[tasks.lint]
+description = "Run Clippy across production and test targets"
+command = "cargo"
+args = ["clippy", "--locked", "--workspace", "--all-targets", "--all-features", "--", "-D", "warnings"]
+
+[tasks.docs]
+description = "Build warning-free Rust documentation"
+env = { "RUSTDOCFLAGS" = "-D warnings" }
+command = "cargo"
+args = ["doc", "--locked", "--workspace", "--no-deps"]
+
+[tasks.fmt]
+description = "Format Rust sources"
+command = "cargo"
+args = ["fmt", "--all"]
+
+[tasks.fmt-check]
+description = "Check Rust formatting and source width"
+dependencies = ["fmt-check-rust", "fmt-check-width"]
+
+[tasks.fmt-check-rust]
+command = "cargo"
+args = ["fmt", "--all", "--check"]
+
+[tasks.fmt-check-width]
+command = "./scripts/check-rust-width.sh"
+
+[tasks.wasm-build]
+private = true
+command = "cargo"
+args = ["build", "--locked", "--release", "--target", "wasm32-unknown-unknown"]
+
+[tasks.wasm-bindgen]
+private = true
+dependencies = ["wasm-build"]
+command = "wasm-bindgen"
+args = ["--target", "web", "--out-dir", "web/pkg", "--out-name", "grafik", "target/wasm32-unknown-unknown/release/grafik.wasm"]
+
+[tasks.wasm]
+description = "Build browser-ready WASM bindings"
+dependencies = ["wasm-bindgen"]
+
+[tasks.test-web]
+description = "Run dependency-free browser-adapter tests"
+command = "node"
+args = ["--test", "web/tests/svg-adapter.test.mjs"]
+
+[tasks.serve]
+description = "Serve the browser tracer on http://127.0.0.1:4173"
+command = "python3"
+args = ["-m", "http.server", "4173", "--bind", "127.0.0.1", "--directory", "web"]
+
+[tasks.clean]
+command = "cargo"
+args = ["clean"]
+
+[tasks.default]
+alias = "check"

@@ -1,0 +1,219 @@
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  color-scheme: light dark;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  color: #282e34;
+  background: #e5e2d9;
+  --paper: #f7f5ee;
+  --ink: #282e34;
+  --muted: #667078;
+  --line: #b9b8b0;
+  --grid: rgb(40 46 52 / 10%);
+  --field: #327c9f;
+  --accent: #df497b;
+}
+
+body {
+  min-width: 320px;
+  margin: 0;
+}
+
+.diagram {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 0;
+  padding: clamp(1rem, 4vw, 4rem);
+  overflow: hidden;
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 4rem 4rem;
+}
+
+.field {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.connector-segment {
+  fill: none;
+  stroke: var(--field);
+  stroke-width: 2;
+  stroke-linecap: square;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  vector-effect: non-scaling-stroke;
+  animation: grow-segment var(--traversal-ms, 160ms) linear forwards;
+}
+
+.connector-segment.is-retracting {
+  stroke-dashoffset: 0;
+  animation: retract-segment var(--traversal-ms, 120ms) linear forwards;
+}
+
+@keyframes grow-segment {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes retract-segment {
+  to {
+    stroke-dashoffset: -1;
+  }
+}
+
+.panel,
+.limits {
+  position: relative;
+  z-index: 1;
+}
+
+.panel {
+  border: 1px solid var(--line);
+  background: var(--paper);
+  box-shadow: 0.6rem 0.6rem 0 rgb(40 46 52 / 12%);
+}
+
+.hero {
+  grid-column: 1 / 10;
+  align-self: start;
+  padding: clamp(1.4rem, 4vw, 3.6rem);
+}
+
+.hero h1 {
+  max-width: 22ch;
+  margin: 1.25rem 0;
+  font-family: system-ui, sans-serif;
+  font-size: clamp(2rem, 6vw, 5.8rem);
+  line-height: 0.95;
+  letter-spacing: -0.055em;
+  text-wrap: balance;
+}
+
+.hero > p:last-child {
+  max-width: 58ch;
+  line-height: 1.65;
+}
+
+.receipt {
+  grid-column: 4 / 13;
+  align-self: end;
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 2rem;
+  margin-top: clamp(12rem, 30vh, 24rem);
+  padding: clamp(1.4rem, 3vw, 2.6rem);
+  border-left: 0.4rem solid var(--accent);
+}
+
+h2 {
+  max-width: 22ch;
+  margin: 0.8rem 0 0;
+  font-family: system-ui, sans-serif;
+  font-size: clamp(1.45rem, 3vw, 2.5rem);
+  line-height: 1.05;
+  text-wrap: balance;
+}
+
+.kicker,
+dt,
+.limits {
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+dl {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+}
+
+dl div {
+  display: grid;
+  grid-template-columns: 6rem 1fr;
+  gap: 0.8rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px dashed var(--line);
+}
+
+dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.status {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+  color: var(--field);
+  font-size: 0.78rem;
+}
+
+.limits {
+  grid-column: 1 / -1;
+  margin-top: 2rem;
+  line-height: 1.6;
+}
+
+noscript {
+  display: block;
+  padding: 1rem;
+  border-top: 1px solid var(--line);
+  background: var(--paper);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color: #f7f5ee;
+    background: #282e34;
+    --paper: #303840;
+    --ink: #f7f5ee;
+    --muted: #aeb5b5;
+    --line: #566168;
+    --grid: rgb(247 245 238 / 9%);
+    --field: #43a8a6;
+    --accent: #ea7644;
+  }
+}
+
+@media (max-width: 700px) {
+  .diagram {
+    display: block;
+    padding: 1rem;
+  }
+
+  .receipt {
+    display: block;
+    margin-top: 12rem;
+  }
+
+  .receipt dl {
+    margin-top: 2rem;
+  }
+
+  .status,
+  .limits {
+    margin-top: 1.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .connector-segment {
+    animation: none;
+  }
+}

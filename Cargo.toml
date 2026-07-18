@@ -1,0 +1,92 @@
+[package]
+name = "grafik"
+version = "0.1.0"
+edition = "2021"
+authors = ["Kapsel Contributors"]
+license = "Apache-2.0"
+repository = "https://github.com/kapsel-cloud/grafik"
+homepage = "https://github.com/kapsel-cloud/grafik"
+documentation = "https://docs.rs/grafik"
+description = "Living diagrams for executable product explanations"
+readme = "README.md"
+rust-version = "1.97"
+publish = false
+keywords = ["visualization", "simulation", "wasm", "diagrams"]
+categories = ["visualization", "wasm"]
+include = [
+  "/src/**",
+  "/web/**",
+  "/docs/**",
+  "/tasks/**",
+  "/scripts/**",
+  "/Cargo.toml",
+  "/Cargo.lock",
+  "/Makefile.toml",
+  "/rust-toolchain.toml",
+  "/rustfmt.toml",
+  "/README.md",
+  "/CHANGELOG.md",
+  "/LICENSE",
+  "/SECURITY.md",
+]
+
+[workspace]
+resolver = "2"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+serde = { version = "=1.0.228", features = ["derive"] }
+serde_json = "=1.0.150"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "=0.2.126"
+
+[lints]
+workspace = true
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+missing_docs = "deny"
+unreachable_pub = "deny"
+
+[workspace.lints.rustdoc]
+broken_intra_doc_links = "deny"
+private_intra_doc_links = "deny"
+bare_urls = "deny"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+nursery = { level = "warn", priority = -1 }
+cargo = { level = "warn", priority = -1 }
+module_name_repetitions = "allow"
+must_use_candidate = "allow"
+missing_errors_doc = "deny"
+missing_panics_doc = "deny"
+cargo_common_metadata = "allow"
+multiple_crate_versions = "allow"
+missing_const_for_fn = "allow"
+missing_enforced_import_renames = "allow"
+redundant_pub_crate = "allow"
+doc_markdown = "allow"
+disallowed_macros = "allow"
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+unimplemented = "deny"
+todo = "deny"
+dbg_macro = "deny"
+print_stdout = "deny"
+print_stderr = "deny"
+inefficient_to_string = "deny"
+unnecessary_self_imports = "deny"
+unused_async = "deny"
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

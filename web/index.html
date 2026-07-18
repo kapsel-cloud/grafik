@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#e5e2d9" />
+    <meta
+      name="description"
+      content="Grafik by Kapsel — living diagrams for executable product explanations."
+    />
+    <title>Grafik by Kapsel</title>
+    <link rel="stylesheet" href="./style.css" />
+    <script type="module" src="./main.js"></script>
+  </head>
+  <body>
+    <main class="diagram" data-diagram>
+      <svg class="field" aria-hidden="true">
+        <g data-connector></g>
+      </svg>
+
+      <header class="panel hero" data-panel="hero">
+        <p class="kicker">Grafik by Kapsel · bootstrap tracer</p>
+        <h1>Living diagrams for executable product explanations.</h1>
+        <p>
+          A seeded Rust simulation evolves one spatial field. The browser measures panels and
+          renders its events without giving WASM control of the page.
+        </p>
+      </header>
+
+      <section class="panel receipt" data-panel="receipt" aria-labelledby="receipt-title">
+        <div>
+          <p class="kicker">Simulated · not production</p>
+          <h2 id="receipt-title">One connector. One replayable explanation.</h2>
+        </div>
+        <dl>
+          <div><dt>seed</dt><dd>424242</dd></div>
+          <div><dt>route</dt><dd>hero.bottom → receipt.top</dd></div>
+          <div><dt>rendering</dt><dd>browser SVG adapter</dd></div>
+        </dl>
+        <p class="status" data-status aria-live="polite">Preparing seeded connector…</p>
+      </section>
+
+      <aside class="limits" aria-label="Current limits">
+        Experimental interface · no gateway connection · no infrastructure work · no credentials
+      </aside>
+    </main>
+    <noscript>Grafik's panels remain readable, but this tracer needs JavaScript to render WASM.</noscript>
+  </body>
+</html>

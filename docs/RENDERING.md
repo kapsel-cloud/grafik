@@ -1,0 +1,39 @@
+# Browser rendering
+
+- **Status:** Active tracer contract
+- **Kind:** Normative browser adapter owner
+- **Authority:** Canonical for geometry, SVG rendering, accessibility, and reduced motion
+- **Owns:** DOM measurement, port selection, trace consumption, visual projection, and motion policy
+- **Does not own:** Seeded choices, route evolution, event ordering, or semantic outcome meaning
+
+## Geometry adapter
+
+After fonts and layout are ready, the browser reads hero and receipt rectangles in the diagram
+stage's local coordinate space. It selects the bottom-center hero port and top-center receipt port
+and sends both rectangles and ports to WASM. It reruns the tracer after a debounced resize. Geometry measurement is browser work;
+Rust never queries or mutates the DOM.
+
+## SVG adapter
+
+One absolutely positioned, `aria-hidden` SVG covers the diagram stage. The adapter converts each
+spatial segment into one SVG line. Growth appends lines in event order; retraction removes them from
+the leaf. The SVG uses `pointer-events: none` and never enters panel stacking or reading order.
+
+The adapter consumes the public JSON event vocabulary directly. It may schedule with browser time,
+but must not reinterpret seeded choices.
+
+## Reduced motion
+
+When `prefers-reduced-motion: reduce` matches, the adapter consumes the complete trace immediately
+and applies its final state. No timer, traversal, pulsing, glitch, or background drift runs. Content,
+panel borders, status text, and the no-JavaScript fallback remain readable without the connector.
+
+## Accessibility and resilience
+
+- Motion is decorative and hidden from assistive technology.
+- A live status announces whether the simulated connector completed or could not start.
+- Meaning and reading order remain in HTML; color and motion carry no unique information.
+- Text reflows without horizontal scrolling at 320 CSS px.
+- With JavaScript disabled, both explanatory panels and the explicit simulated/non-production label
+  remain present.
+- Browser errors are shown as text rather than leaving a perpetual loading state.
