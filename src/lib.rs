@@ -603,8 +603,8 @@ impl SeededRandom {
 #[cfg(test)]
 mod tests {
     use super::{
-        simulate, Edge, EdgePort, FinalDisposition, Point, Rect, ResultSource, SimulationError,
-        SimulationInput, SpatialEvent,
+        simulate, Edge, EdgePort, FinalDisposition, Point, QuestionTone, Rect, ResultSource,
+        SimulationError, SimulationInput, SpatialEvent,
     };
 
     #[test]
@@ -794,6 +794,67 @@ mod tests {
             })
             .max()
             .unwrap_or_default()
+    }
+
+    #[test]
+    fn seeds_vary_profile_parameters_and_question_palette_roles() -> Result<(), SimulationError> {
+        let mut pulses = Vec::new();
+        let mut glitches = Vec::new();
+        let mut tones = [false; 3];
+
+        for seed in 1..=64 {
+            let success = simulate(valid_input(seed))?;
+            for event in success.events {
+                if let SpatialEvent::SuccessPulsed {
+                    duration_ms,
+                    intensity,
+                    ..
+                } = event
+                {
+                    let profile = (duration_ms, intensity);
+                    if !pulses.contains(&profile) {
+                        pulses.push(profile);
+                    }
+                }
+            }
+
+            let mut failed_input = valid_input(seed);
+            failed_input.final_disposition = FinalDisposition::Failed;
+            let failed = simulate(failed_input)?;
+            for event in failed.events {
+                if let SpatialEvent::FailureGlitched {
+                    duration_ms,
+                    offset_x,
+                    offset_y,
+                    strips,
+                    ..
+                } = event
+                {
+                    let profile = (duration_ms, offset_x, offset_y, strips);
+                    if !glitches.contains(&profile) {
+                        glitches.push(profile);
+                    }
+                }
+            }
+
+            let mut unknown_input = valid_input(seed);
+            unknown_input.final_disposition = FinalDisposition::Unknown;
+            let unknown = simulate(unknown_input)?;
+            for event in unknown.events {
+                if let SpatialEvent::QuestionMarkAppeared { tone, .. } = event {
+                    tones[match tone {
+                        QuestionTone::Accent => 0,
+                        QuestionTone::Warning => 1,
+                        QuestionTone::Info => 2,
+                    }] = true;
+                }
+            }
+        }
+
+        assert!(pulses.len() > 1);
+        assert!(glitches.len() > 1);
+        assert!(tones.into_iter().all(|seen| seen));
+        Ok(())
     }
 
     #[test]
