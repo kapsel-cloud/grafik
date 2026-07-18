@@ -14,6 +14,7 @@
   --grid: rgb(40 46 52 / 10%);
   --field: #327c9f;
   --accent: #df497b;
+  --warning: #ea7644;
 }
 
 body {
@@ -66,6 +67,14 @@ body {
   stroke-width: 2.5;
 }
 
+.connector-segment.is-success-pulsing {
+  animation: success-pulse var(--pulse-ms, 120ms) ease-out var(--pulse-delay-ms, 0ms) both;
+}
+
+.connector-segment[data-pulse-intensity="3"] {
+  --pulse-width: 4;
+}
+
 .connector-segment.is-retracting {
   stroke-dashoffset: 0;
   animation: retract-segment var(--traversal-ms, 120ms) linear forwards;
@@ -80,6 +89,14 @@ body {
 @keyframes retract-segment {
   to {
     stroke-dashoffset: -1;
+  }
+}
+
+@keyframes success-pulse {
+  50% {
+    stroke: var(--accent);
+    stroke-width: var(--pulse-width, 3);
+    filter: drop-shadow(0 0 0.22rem var(--accent));
   }
 }
 
@@ -164,6 +181,148 @@ dd {
   overflow-wrap: anywhere;
 }
 
+.outcome-value {
+  position: relative;
+  isolation: isolate;
+  min-height: 1.2em;
+}
+
+.outcome-text {
+  position: relative;
+  z-index: 1;
+}
+
+.outcome-effect-layer {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.outcome-effect-layer::before {
+  position: absolute;
+  inset: -0.16rem -0.3rem;
+  content: "";
+  opacity: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--accent) 68%, transparent) 0 2px,
+    transparent 2px calc(100% / var(--glitch-strips, 1))
+  );
+  transform: translate(var(--glitch-x, 0), var(--glitch-y, 0));
+}
+
+.outcome-effect-layer.is-failure-glitching::before {
+  animation: failure-glitch var(--glitch-ms, 180ms) steps(2, jump-none);
+}
+
+.question-mark {
+  position: absolute;
+  left: var(--mark-x);
+  top: var(--mark-y);
+  font-family: system-ui, sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.65) rotate(-8deg);
+  animation: question-pop var(--mark-ms) ease-out both;
+}
+
+.question-mark[data-tone="accent"] {
+  color: var(--accent);
+}
+
+.question-mark[data-tone="warning"] {
+  color: var(--warning);
+}
+
+.question-mark[data-tone="info"] {
+  color: var(--field);
+}
+
+@keyframes failure-glitch {
+  20%,
+  75% {
+    opacity: 0.72;
+  }
+  45% {
+    transform: translate(var(--glitch-y, 0), var(--glitch-x, 0));
+  }
+}
+
+@keyframes question-pop {
+  18%,
+  72% {
+    opacity: 0.8;
+    transform: translate(-50%, -50%) scale(1) rotate(5deg);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -65%) scale(0.82) rotate(9deg);
+  }
+}
+
+.profile-controls[hidden] {
+  display: none;
+}
+
+.profile-controls {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px dashed var(--line);
+}
+
+.outcome-buttons {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.outcome-buttons button,
+.seed-control input {
+  border: 1px solid var(--line);
+  border-radius: 0;
+  color: var(--ink);
+  background: transparent;
+  font: inherit;
+}
+
+.outcome-buttons button {
+  padding: 0.45rem 0.65rem;
+  cursor: pointer;
+}
+
+.outcome-buttons button[aria-pressed="true"] {
+  border-color: var(--field);
+  background: color-mix(in srgb, var(--field) 18%, transparent);
+}
+
+.outcome-buttons button:focus-visible,
+.seed-control input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.seed-control {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.seed-control input {
+  width: 7.5rem;
+  padding: 0.4rem;
+}
+
 .status {
   grid-column: 1 / -1;
   margin: 0;
@@ -215,6 +374,22 @@ noscript {
     margin-top: 2rem;
   }
 
+  .profile-controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .outcome-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .outcome-buttons button {
+    min-width: 0;
+    padding-inline: 0.25rem;
+    font-size: 0.7rem;
+  }
+
   .status,
   .limits {
     margin-top: 1.5rem;
@@ -222,7 +397,9 @@ noscript {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .connector-segment {
+  .connector-segment,
+  .outcome-effect-layer::before,
+  .question-mark {
     animation: none;
   }
 }

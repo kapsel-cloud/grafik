@@ -10,19 +10,25 @@ export const segmentAttributes = (event) => ({
 });
 
 const browserLine = () => document.createElementNS(SVG_NAMESPACE, "line");
+const browserMark = () => document.createElement("span");
 
 export const renderTrace = (
   trace,
   {
     group,
+    outcomeLayer,
+    outcomeOrigin = { x: 0, y: 0 },
     reducedMotion,
     announce = () => {},
     createLine = browserLine,
+    createMark = browserMark,
     schedule = globalThis.setTimeout,
     cancel = globalThis.clearTimeout,
   },
 ) => {
   group.replaceChildren();
+  outcomeLayer.replaceChildren();
+  outcomeLayer.classList.remove("is-failure-glitching");
   const source = trace.result_source === "recorded" ? "Recorded" : "Simulated";
   const result = `${source} ${trace.final_disposition} result`;
   if (reducedMotion) {
@@ -47,6 +53,57 @@ export const renderTrace = (
         }, event.at_ms),
       );
     }
+    if (event.kind === "success_pulsed") {
+      timers.push(
+        schedule(() => {
+          const lines = [...segments.values()];
+          const step = event.duration_ms / Math.max(lines.length, 1);
+          for (const [index, line] of lines.entries()) {
+            line.setAttribute("data-pulse-intensity", String(event.intensity));
+            line.style.setProperty("--pulse-delay-ms", `${Math.round(index * step)}ms`);
+            line.style.setProperty("--pulse-ms", `${Math.round(step)}ms`);
+            line.classList.add("is-success-pulsing");
+          }
+          timers.push(
+            schedule(() => {
+              for (const line of lines) line.classList.remove("is-success-pulsing");
+            }, event.duration_ms),
+          );
+        }, event.at_ms),
+      );
+    }
+    if (event.kind === "failure_glitched") {
+      timers.push(
+        schedule(() => {
+          outcomeLayer.style.setProperty("--glitch-x", `${event.offset_x}px`);
+          outcomeLayer.style.setProperty("--glitch-y", `${event.offset_y}px`);
+          outcomeLayer.style.setProperty("--glitch-strips", String(event.strips));
+          outcomeLayer.style.setProperty("--glitch-ms", `${event.duration_ms}ms`);
+          outcomeLayer.classList.add("is-failure-glitching");
+          timers.push(
+            schedule(
+              () => outcomeLayer.classList.remove("is-failure-glitching"),
+              event.duration_ms,
+            ),
+          );
+        }, event.at_ms),
+      );
+    }
+    if (event.kind === "question_mark_appeared") {
+      timers.push(
+        schedule(() => {
+          const mark = createMark();
+          mark.textContent = "?";
+          mark.dataset.tone = event.tone;
+          mark.classList.add("question-mark");
+          mark.style.setProperty("--mark-x", `${event.point.x - outcomeOrigin.x}px`);
+          mark.style.setProperty("--mark-y", `${event.point.y - outcomeOrigin.y}px`);
+          mark.style.setProperty("--mark-ms", `${event.lifetime_ms}ms`);
+          outcomeLayer.append(mark);
+          timers.push(schedule(() => mark.remove(), event.lifetime_ms));
+        }, event.at_ms),
+      );
+    }
     if (event.kind === "segment_retracted") {
       timers.push(
         schedule(() => {
@@ -63,7 +120,7 @@ export const renderTrace = (
         }, event.at_ms),
       );
     }
-    if (event.kind === "connector_finished") {
+    if (event.kind === "outcome_finished") {
       timers.push(schedule(() => announce(`${result} complete.`), event.at_ms));
     }
   }
@@ -71,5 +128,7 @@ export const renderTrace = (
   return () => {
     for (const timer of timers) cancel(timer);
     group.replaceChildren();
+    outcomeLayer.replaceChildren();
+    outcomeLayer.classList.remove("is-failure-glitching");
   };
 };
