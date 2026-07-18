@@ -35,9 +35,12 @@ Required native behaviors:
 - identical input and seed produce identical complete traces and JSON;
 - invalid or overlapping geometry fails before producing events;
 - grown segments remain outside panel interiors except at selected ports;
-- `SUCCEEDED` alone emits weighted progress with weights in the documented range;
-- retraction indexes are the reverse of growth indexes;
-- event density and durations remain within `PATTERNS.md` budgets.
+- `SUCCEEDED` emits weighted progress, one bounded pulse, and leaf-first retraction;
+- `FAILED` emits one bounded decorative glitch and no successful progress;
+- `UNKNOWN` emits a two-second seeded burst at 1–3 marks per second, with normal and rare density
+  limits independently asserted;
+- `NOT_ATTEMPTED` emits no receiver cue;
+- every profile's density, lifetime, displacement, and duration remain within `PATTERNS.md` budgets.
 
 ## Browser evidence
 

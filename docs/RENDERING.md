@@ -10,8 +10,8 @@
 
 After fonts and layout are ready, the browser reads hero and receipt rectangles in the diagram
 stage's local coordinate space. It selects the bottom-center hero port and top-center receipt port
-and sends both rectangles and ports to WASM. It reruns the tracer after a debounced resize. Geometry measurement is browser work;
-Rust never queries or mutates the DOM.
+and sends both rectangles, ports, and the outcome-text region to WASM. It reruns the tracer after a
+debounced resize. Geometry measurement is browser work; Rust never queries or mutates the DOM.
 
 ## Recorded result adapter
 
@@ -25,15 +25,21 @@ provenance is the permanent GitHub evaluator guide for Kapsel `v0.1.0`. It conta
 grants, seeds, kubeconfig, journal, receipt bytes or digest, trust material, private paths, cluster
 identities, operation identifiers, source revisions, commands, or timing.
 
-## SVG adapter
+The standalone preview starts with this recorded `SUCCEEDED` result. Selecting `FAILED` or `UNKNOWN`
+creates an explicitly simulated result with the same seed and performs no infrastructure work.
+Controls update readable outcome and provenance text before running the decorative profile.
+
+## Browser outcome adapter
 
 One absolutely positioned, `aria-hidden` SVG covers the diagram stage. The adapter converts each
 spatial segment into one SVG line. Growth appends lines in event order; retraction removes them from
 the leaf. The SVG uses `pointer-events: none` and never enters panel stacking or reading order.
 
-The adapter consumes the public JSON event vocabulary directly. For successful progress, it maps
-seeded weights 1 through 3 to subtle line emphasis without adding events or changing result meaning.
-It may schedule with browser time, but must not reinterpret seeded choices.
+The adapter consumes the public JSON event vocabulary directly. It maps successful weights and the
+pulse to connector emphasis, applies failure displacement only to a decorative layer behind the
+outcome text, and projects question marks into an `aria-hidden` layer behind the same region. Palette
+roles become theme-aware CSS colors in the browser. It may schedule with browser time, but must not
+reinterpret seeded choices or add ambient randomness.
 
 ## Reduced motion
 
@@ -44,7 +50,8 @@ panel borders, status text, and the no-JavaScript fallback remain readable witho
 ## Accessibility and resilience
 
 - Motion is decorative and hidden from assistive technology.
-- A live status announces whether the simulated connector completed or could not start.
+- Native buttons expose the three receiver outcomes and state selection with `aria-pressed`.
+- A live status announces the selected result profile or a readable failure.
 - Meaning and reading order remain in HTML; color and motion carry no unique information.
 - Text reflows without horizontal scrolling at 320 CSS px.
 - With JavaScript disabled, both explanatory panels and the explicit simulated/non-production label

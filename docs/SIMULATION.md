@@ -9,8 +9,9 @@
 ## Interface
 
 The Rust interface accepts a `SimulationInput` containing a nonzero `u64` seed, result source, final
-disposition, hero and receipt panel rectangles, and selected edge ports. Coordinates are finite
-CSS-pixel values in one browser coordinate space. The source is either `simulated`, which performs
+disposition, hero and receipt panel rectangles, selected edge ports, and an outcome-text region.
+Coordinates are finite CSS-pixel values in one browser coordinate space. The source is either
+`simulated`, which performs
 no infrastructure work, or `recorded`, which identifies an intentionally published earlier result.
 
 `simulate(input)` either returns a complete `Trace` or a validation error. The trace contains the
@@ -29,18 +30,19 @@ wall time only controls how quickly events are displayed and cannot alter route 
 
 ## Spatial events
 
-Every trace emits `connector_started` with selected ports and `connector_finished` with final
-simulation time. For `SUCCEEDED`, the events between them are:
+Every trace begins with `outcome_started` and ends with `outcome_finished`. Events between them are
+selected only by final disposition:
 
-1. One or more `segment_grew` events with segment index, seeded progress weight, endpoints, start
-   time, and duration.
-2. Matching `segment_retracted` events in descending index order with start time and duration.
-
-Other dispositions do not reuse successful progress and emit no events between connector start and
-finish.
+- `SUCCEEDED`: `connector_started`, one or more weighted `segment_grew` events, one
+  `success_pulsed` event, matching leaf-first `segment_retracted` events, then
+  `connector_finished`.
+- `FAILED`: one `failure_glitched` event carrying bounded duration, displacement, and strip count.
+- `UNKNOWN`: bounded `question_mark_appeared` events carrying absolute coordinates, lifetime, and
+  one of three palette roles.
+- `NOT_ATTEMPTED`: no receiver-cue event.
 
 Events are renderer-neutral coordinates and timing descriptions. They contain no selectors, SVG
-commands, CSS classes, colors, or DOM objects.
+commands, CSS classes, literal colors, or DOM objects.
 
 ## Replay guarantee
 

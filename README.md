@@ -1,4 +1,4 @@
-# Grafik by Kapsel
+# grafik
 
 **Living diagrams for executable product explanations.**
 

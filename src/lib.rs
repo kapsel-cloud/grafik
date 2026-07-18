@@ -1,8 +1,8 @@
 //! Seeded spatial simulation for Grafik living diagrams.
 //!
-//! The [`simulate`] interface accepts browser-measured geometry and returns a complete,
-//! renderer-neutral [`Trace`]. The implementation performs no I/O, reads no ambient randomness or
-//! clock, and has no knowledge of the DOM.
+//! The [`simulate`] interface accepts one bounded result plus browser-measured geometry and returns
+//! a complete, renderer-neutral [`Trace`]. The implementation performs no I/O, reads no ambient
+//! randomness or clock, and has no knowledge of the DOM.
 
 use core::fmt;
 use serde::{Deserialize, Serialize};
@@ -134,6 +134,18 @@ pub enum FinalDisposition {
     Unknown,
 }
 
+/// Theme-aware palette role for a decorative uncertainty mark.
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum QuestionTone {
+    /// Primary outcome accent role.
+    Accent,
+    /// Warning role.
+    Warning,
+    /// Informational role.
+    Info,
+}
+
 /// Complete controlled input for one connector simulation.
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
 pub struct SimulationInput {
@@ -147,39 +159,23 @@ pub struct SimulationInput {
     pub hero: Rect,
     /// Receipt panel exclusion rectangle.
     pub receipt: Rect,
+    /// Browser-measured region containing the readable outcome text.
+    pub outcome_region: Rect,
     /// Selected attachment on the hero panel.
     pub hero_port: EdgePort,
     /// Selected attachment on the receipt panel.
     pub receipt_port: EdgePort,
 }
 
-impl SimulationInput {
-    /// Creates a complete simulation input.
-    pub const fn new(
-        seed: u64,
-        result_source: ResultSource,
-        final_disposition: FinalDisposition,
-        hero: Rect,
-        receipt: Rect,
-        hero_port: EdgePort,
-        receipt_port: EdgePort,
-    ) -> Self {
-        Self {
-            seed,
-            result_source,
-            final_disposition,
-            hero,
-            receipt,
-            hero_port,
-            receipt_port,
-        }
-    }
-}
-
 /// One renderer-neutral evolution event in a spatial trace.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[serde(tag = "kind", rename_all = "snake_case")]
 pub enum SpatialEvent {
+    /// Marks the beginning of one bounded outcome profile.
+    OutcomeStarted {
+        /// Simulation time in milliseconds.
+        at_ms: u32,
+    },
     /// Declares the selected connector endpoints.
     ConnectorStarted {
         /// Simulation time in milliseconds.
@@ -204,6 +200,41 @@ pub enum SpatialEvent {
         /// Segment end.
         to: Point,
     },
+    /// Pulses once through a completely grown successful connector.
+    SuccessPulsed {
+        /// Simulation time in milliseconds.
+        at_ms: u32,
+        /// Pulse traversal duration in milliseconds.
+        duration_ms: u16,
+        /// Seeded emphasis from 1 through 3.
+        intensity: u8,
+    },
+    /// Glitches one decorative layer behind failed outcome text.
+    FailureGlitched {
+        /// Simulation time in milliseconds.
+        at_ms: u32,
+        /// Glitch lifetime in milliseconds.
+        duration_ms: u16,
+        /// Horizontal decorative displacement in CSS pixels.
+        offset_x: i8,
+        /// Vertical decorative displacement in CSS pixels.
+        offset_y: i8,
+        /// Number of decorative glitch strips.
+        strips: u8,
+    },
+    /// Places one decorative uncertainty symbol for a bounded lifetime.
+    QuestionMarkAppeared {
+        /// Stable zero-based mark index.
+        index: u8,
+        /// Simulation time in milliseconds.
+        at_ms: u32,
+        /// Mark lifetime in milliseconds.
+        lifetime_ms: u16,
+        /// Absolute coordinate in the browser spatial field.
+        point: Point,
+        /// Browser palette role rather than a literal color.
+        tone: QuestionTone,
+    },
     /// Removes one previously grown segment from the connector leaf.
     SegmentRetracted {
         /// Index of the segment being removed.
@@ -215,7 +246,12 @@ pub enum SpatialEvent {
     },
     /// Marks the end of a complete grown-and-retracted connector trace.
     ConnectorFinished {
-        /// Final simulation time in milliseconds.
+        /// Final connector simulation time in milliseconds.
+        at_ms: u32,
+    },
+    /// Marks the end of one complete outcome profile.
+    OutcomeFinished {
+        /// Final profile simulation time in milliseconds.
         at_ms: u32,
     },
 }
@@ -278,7 +314,7 @@ impl fmt::Display for SimulationError {
 
 impl std::error::Error for SimulationError {}
 
-/// Evolves one seeded connector from growth through leaf-first retraction.
+/// Evolves one seeded, bounded outcome profile into renderer-neutral events.
 ///
 /// # Errors
 ///
@@ -292,14 +328,15 @@ pub fn simulate(input: SimulationInput) -> Result<Trace, SimulationError> {
     let mut events = Vec::with_capacity(points.len() * 2 + 1);
     let mut time_ms = 0_u32;
 
-    events.push(SpatialEvent::ConnectorStarted {
-        at_ms: time_ms,
-        from: input.hero_port.point,
-        to: input.receipt_port.point,
-    });
+    events.push(SpatialEvent::OutcomeStarted { at_ms: time_ms });
 
     let mut segment_count = 0_u8;
     if input.final_disposition == FinalDisposition::Succeeded {
+        events.push(SpatialEvent::ConnectorStarted {
+            at_ms: time_ms,
+            from: input.hero_port.point,
+            to: input.receipt_port.point,
+        });
         for pair in points.windows(2) {
             let [from, to] = pair else {
                 continue;
@@ -318,6 +355,14 @@ pub fn simulate(input: SimulationInput) -> Result<Trace, SimulationError> {
             segment_count += 1;
         }
 
+        let duration_ms = random.range_u16(360, 720);
+        events.push(SpatialEvent::SuccessPulsed {
+            at_ms: time_ms,
+            duration_ms,
+            intensity: random.range_u8(1, 3),
+        });
+        time_ms += u32::from(duration_ms);
+
         for index in (0..segment_count).rev() {
             let duration_ms = random.range_u16(90, 180);
             events.push(SpatialEvent::SegmentRetracted {
@@ -327,15 +372,78 @@ pub fn simulate(input: SimulationInput) -> Result<Trace, SimulationError> {
             });
             time_ms += u32::from(duration_ms);
         }
+        events.push(SpatialEvent::ConnectorFinished { at_ms: time_ms });
+    } else if input.final_disposition == FinalDisposition::Failed {
+        let duration_ms = random.range_u16(140, 260);
+        events.push(SpatialEvent::FailureGlitched {
+            at_ms: time_ms,
+            duration_ms,
+            offset_x: random.offset_3(),
+            offset_y: random.offset_3(),
+            strips: random.range_u8(1, 3),
+        });
+        time_ms += u32::from(duration_ms);
+    } else if input.final_disposition == FinalDisposition::Unknown {
+        let rate = random.range_u8(1, 3);
+        let normal_count = rate * 2;
+        let interval_ms = 1_000 / u32::from(rate);
+        let rare_cluster = random.one_in(32);
+        let cluster_after = normal_count / 2;
+        let mut mark_index = 0_u8;
+        for normal_index in 0..normal_count {
+            let at_ms = u32::from(normal_index) * interval_ms;
+            time_ms = time_ms.max(push_question_mark(
+                &mut events,
+                &mut random,
+                input.outcome_region,
+                mark_index,
+                at_ms,
+            ));
+            mark_index += 1;
+            if rare_cluster && normal_index == cluster_after {
+                for _ in 0..2 {
+                    time_ms = time_ms.max(push_question_mark(
+                        &mut events,
+                        &mut random,
+                        input.outcome_region,
+                        mark_index,
+                        at_ms,
+                    ));
+                    mark_index += 1;
+                }
+            }
+        }
     }
 
-    events.push(SpatialEvent::ConnectorFinished { at_ms: time_ms });
+    events.push(SpatialEvent::OutcomeFinished { at_ms: time_ms });
     Ok(Trace {
         seed: input.seed,
         result_source: input.result_source,
         final_disposition: input.final_disposition,
         events,
     })
+}
+
+fn push_question_mark(
+    events: &mut Vec<SpatialEvent>,
+    random: &mut SeededRandom,
+    region: Rect,
+    index: u8,
+    at_ms: u32,
+) -> u32 {
+    let lifetime_ms = random.range_u16(450, 900);
+    let point = Point::new(
+        random.range_f64(region.x, region.right()),
+        random.range_f64(region.y, region.bottom()),
+    );
+    events.push(SpatialEvent::QuestionMarkAppeared {
+        index,
+        at_ms,
+        lifetime_ms,
+        point,
+        tone: random.question_tone(),
+    });
+    at_ms + u32::from(lifetime_ms)
 }
 
 fn validate(input: SimulationInput) -> Result<(), SimulationError> {
@@ -347,6 +455,9 @@ fn validate(input: SimulationInput) -> Result<(), SimulationError> {
     }
     if !input.receipt.is_valid() {
         return Err(SimulationError::InvalidGeometry("receipt panel"));
+    }
+    if !input.outcome_region.is_valid() || !rect_contains(input.receipt, input.outcome_region) {
+        return Err(SimulationError::InvalidGeometry("outcome region"));
     }
     if !input.hero_port.point.is_finite() {
         return Err(SimulationError::InvalidGeometry("hero port"));
@@ -364,6 +475,13 @@ fn validate(input: SimulationInput) -> Result<(), SimulationError> {
         return Err(SimulationError::InsufficientVerticalGap);
     }
     Ok(())
+}
+
+fn rect_contains(outer: Rect, inner: Rect) -> bool {
+    inner.x + GEOMETRY_EPSILON >= outer.x
+        && inner.y + GEOMETRY_EPSILON >= outer.y
+        && inner.right() <= outer.right() + GEOMETRY_EPSILON
+        && inner.bottom() <= outer.bottom() + GEOMETRY_EPSILON
 }
 
 fn port_is_on_edge(rect: Rect, port: EdgePort, required_edge: Edge) -> bool {
@@ -440,6 +558,41 @@ impl SeededRandom {
         }
     }
 
+    fn one_in(&mut self, denominator: u8) -> bool {
+        self.next_u64().to_le_bytes()[0].is_multiple_of(denominator)
+    }
+
+    fn question_tone(&mut self) -> QuestionTone {
+        match self.next_u64().to_le_bytes()[0] % 3 {
+            0 => QuestionTone::Accent,
+            1 => QuestionTone::Warning,
+            _ => QuestionTone::Info,
+        }
+    }
+
+    fn range_f64(&mut self, minimum: f64, maximum: f64) -> f64 {
+        let bytes = self.next_u64().to_le_bytes();
+        let sample = f64::from(u16::from_le_bytes([bytes[0], bytes[1]]));
+        minimum + (maximum - minimum) * sample / f64::from(u16::MAX)
+    }
+
+    fn offset_3(&mut self) -> i8 {
+        match self.next_u64().to_le_bytes()[0] % 7 {
+            0 => -3,
+            1 => -2,
+            2 => -1,
+            3 => 0,
+            4 => 1,
+            5 => 2,
+            _ => 3,
+        }
+    }
+
+    fn range_u8(&mut self, minimum: u8, maximum: u8) -> u8 {
+        let width = maximum - minimum + 1;
+        minimum + self.next_u64().to_le_bytes()[0] % width
+    }
+
     fn range_u16(&mut self, minimum: u16, maximum: u16) -> u16 {
         let width = maximum - minimum + 1;
         let sample = u16::from(self.next_u64().to_le_bytes()[0]);
@@ -456,15 +609,16 @@ mod tests {
 
     #[test]
     fn same_seed_and_geometry_replay_the_same_trace() -> Result<(), Box<dyn std::error::Error>> {
-        let input = SimulationInput::new(
-            42,
-            ResultSource::Simulated,
-            FinalDisposition::Succeeded,
-            Rect::new(80.0, 40.0, 320.0, 160.0),
-            Rect::new(520.0, 420.0, 360.0, 220.0),
-            EdgePort::new(Point::new(240.0, 200.0), Edge::Bottom),
-            EdgePort::new(Point::new(700.0, 420.0), Edge::Top),
-        );
+        let input = SimulationInput {
+            seed: 42,
+            result_source: ResultSource::Simulated,
+            final_disposition: FinalDisposition::Succeeded,
+            hero: Rect::new(80.0, 40.0, 320.0, 160.0),
+            receipt: Rect::new(520.0, 420.0, 360.0, 220.0),
+            outcome_region: Rect::new(560.0, 460.0, 160.0, 32.0),
+            hero_port: EdgePort::new(Point::new(240.0, 200.0), Edge::Bottom),
+            receipt_port: EdgePort::new(Point::new(700.0, 420.0), Edge::Top),
+        };
 
         let first = simulate(input)?;
         let second = simulate(input)?;
@@ -521,6 +675,18 @@ mod tests {
 
         assert!(!weights.is_empty());
         assert!(weights.iter().all(|weight| (1..=3).contains(weight)));
+        let pulses = succeeded.events.iter().filter_map(|event| match event {
+            SpatialEvent::SuccessPulsed {
+                duration_ms,
+                intensity,
+                ..
+            } => Some((*duration_ms, *intensity)),
+            _ => None,
+        });
+        let pulses = pulses.collect::<Vec<_>>();
+        assert_eq!(pulses.len(), 1);
+        assert!((360..=720).contains(&pulses[0].0));
+        assert!((1..=3).contains(&pulses[0].1));
 
         for disposition in [
             FinalDisposition::NotAttempted,
@@ -534,6 +700,130 @@ mod tests {
                 event,
                 SpatialEvent::SegmentGrew { .. } | SpatialEvent::SegmentRetracted { .. }
             )));
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn failed_emits_one_bounded_text_local_glitch() -> Result<(), SimulationError> {
+        let mut input = valid_input(9_001);
+        input.final_disposition = FinalDisposition::Failed;
+        let trace = simulate(input)?;
+        let glitches = trace.events.iter().filter_map(|event| match event {
+            SpatialEvent::FailureGlitched {
+                duration_ms,
+                offset_x,
+                offset_y,
+                strips,
+                ..
+            } => Some((*duration_ms, *offset_x, *offset_y, *strips)),
+            _ => None,
+        });
+        let glitches = glitches.collect::<Vec<_>>();
+
+        assert_eq!(glitches.len(), 1);
+        assert!((140..=260).contains(&glitches[0].0));
+        assert!((-3..=3).contains(&glitches[0].1));
+        assert!((-3..=3).contains(&glitches[0].2));
+        assert!((1..=3).contains(&glitches[0].3));
+        Ok(())
+    }
+
+    #[test]
+    fn unknown_emits_a_bounded_seeded_question_mark_burst() -> Result<(), SimulationError> {
+        let mut input = valid_input(4_242);
+        input.final_disposition = FinalDisposition::Unknown;
+        let trace = simulate(input)?;
+        let marks = question_marks(&trace);
+
+        assert!((2..=6).contains(&marks.len()));
+        assert!(marks.iter().all(|(_, at_ms, lifetime_ms, point)| {
+            *at_ms < 2_000
+                && (450..=900).contains(lifetime_ms)
+                && point.x >= input.outcome_region.x
+                && point.x <= input.outcome_region.right()
+                && point.y >= input.outcome_region.y
+                && point.y <= input.outcome_region.bottom()
+        }));
+        assert!(maximum_live_marks(&marks) <= 3);
+
+        let mut rare_marks = None;
+        for seed in 1..=4_096 {
+            let mut candidate = valid_input(seed);
+            candidate.final_disposition = FinalDisposition::Unknown;
+            let candidate_trace = simulate(candidate)?;
+            let candidate_marks = question_marks(&candidate_trace);
+            if candidate_marks.len() > 6 {
+                rare_marks = Some(candidate_marks);
+                break;
+            }
+        }
+        assert!(rare_marks
+            .as_ref()
+            .is_some_and(|marks| { marks.len() <= 8 && maximum_live_marks(marks) <= 5 }));
+        Ok(())
+    }
+
+    fn question_marks(trace: &super::Trace) -> Vec<(u8, u32, u16, Point)> {
+        trace
+            .events
+            .iter()
+            .filter_map(|event| match event {
+                SpatialEvent::QuestionMarkAppeared {
+                    index,
+                    at_ms,
+                    lifetime_ms,
+                    point,
+                    ..
+                } => Some((*index, *at_ms, *lifetime_ms, *point)),
+                _ => None,
+            })
+            .collect()
+    }
+
+    fn maximum_live_marks(marks: &[(u8, u32, u16, Point)]) -> usize {
+        marks
+            .iter()
+            .map(|(_, at_ms, _, _)| {
+                marks
+                    .iter()
+                    .filter(|(_, other_at_ms, lifetime_ms, _)| {
+                        other_at_ms <= at_ms && *at_ms < *other_at_ms + u32::from(*lifetime_ms)
+                    })
+                    .count()
+            })
+            .max()
+            .unwrap_or_default()
+    }
+
+    #[test]
+    fn every_profile_has_generic_boundaries_without_false_connector_events(
+    ) -> Result<(), SimulationError> {
+        for disposition in [
+            FinalDisposition::NotAttempted,
+            FinalDisposition::Succeeded,
+            FinalDisposition::Failed,
+            FinalDisposition::Unknown,
+        ] {
+            let mut input = valid_input(808);
+            input.final_disposition = disposition;
+            let trace = simulate(input)?;
+            assert!(matches!(
+                trace.events.first(),
+                Some(SpatialEvent::OutcomeStarted { at_ms: 0 })
+            ));
+            assert!(matches!(
+                trace.events.last(),
+                Some(SpatialEvent::OutcomeFinished { .. })
+            ));
+            let has_connector = trace
+                .events
+                .iter()
+                .any(|event| matches!(event, SpatialEvent::ConnectorStarted { .. }));
+            assert_eq!(has_connector, disposition == FinalDisposition::Succeeded);
+            if disposition == FinalDisposition::NotAttempted {
+                assert_eq!(trace.events.len(), 2);
+            }
         }
         Ok(())
     }
@@ -585,6 +875,7 @@ mod tests {
         let mut overlapping = valid_input(1);
         overlapping.receipt.y = 210.0;
         overlapping.receipt_port.point.y = 210.0;
+        overlapping.outcome_region.y = 230.0;
         let mut misplaced_port = valid_input(1);
         misplaced_port.hero_port.point.y -= 1.0;
 
@@ -645,14 +936,15 @@ mod tests {
     }
 
     fn valid_input(seed: u64) -> SimulationInput {
-        SimulationInput::new(
+        SimulationInput {
             seed,
-            ResultSource::Simulated,
-            FinalDisposition::Succeeded,
-            Rect::new(80.0, 40.0, 320.0, 160.0),
-            Rect::new(520.0, 420.0, 360.0, 220.0),
-            EdgePort::new(Point::new(240.0, 200.0), Edge::Bottom),
-            EdgePort::new(Point::new(700.0, 420.0), Edge::Top),
-        )
+            result_source: ResultSource::Simulated,
+            final_disposition: FinalDisposition::Succeeded,
+            hero: Rect::new(80.0, 40.0, 320.0, 160.0),
+            receipt: Rect::new(520.0, 420.0, 360.0, 220.0),
+            outcome_region: Rect::new(560.0, 460.0, 160.0, 32.0),
+            hero_port: EdgePort::new(Point::new(240.0, 200.0), Edge::Bottom),
+            receipt_port: EdgePort::new(Point::new(700.0, 420.0), Edge::Top),
+        }
     }
 }
