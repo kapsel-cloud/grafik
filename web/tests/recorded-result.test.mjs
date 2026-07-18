@@ -24,11 +24,9 @@ test("recorded fixture exposes one bounded publishable result", async () => {
     result_source: "recorded",
     final_disposition: "SUCCEEDED",
   });
-  assert.equal(fixture.provenance.producer_package_version, "0.1.0");
-  assert.match(fixture.provenance.source_revision, /^[0-9a-f]{40}$/);
-  assert.equal(fixture.provenance.source_revision_description, "v0.1.0-3-g1f8cca9");
-  assert.equal(fixture.provenance.command, "cargo make demo-kind");
-  assert.equal(fixture.provenance.operation_id, "demo-healthy-op");
+  assert.deepEqual(fixture.provenance, {
+    evaluator: "https://github.com/kapsel-cloud/kapsel/blob/v0.1.0/docs/EVALUATOR.md",
+  });
   assert.deepEqual(fixture.non_claims, [
     "no-exactly-once",
     "no-causation",
