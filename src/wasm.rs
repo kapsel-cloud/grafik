@@ -3,7 +3,7 @@ use wasm_bindgen::JsValue;
 
 use crate::{simulate, SimulationInput};
 
-/// Parses controlled browser geometry and returns one complete spatial trace as JSON.
+/// Parses a controlled semantic result and browser geometry into one complete spatial trace.
 ///
 /// # Errors
 ///

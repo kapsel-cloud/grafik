@@ -12,8 +12,9 @@ Bootstrap tracer only. The simulation trace is deterministic and renderer-neutra
 browser SVG adapter is a narrow proof, not a stable interface or production-ready animation
 library.
 
-Grafik does not connect to Kubernetes or a Kapsel gateway, does not hold credentials, does not
-manipulate the DOM from WASM, and does not yet model receipt outcomes.
+Grafik does not connect to Kubernetes or a Kapsel gateway, does not hold credentials, and does not
+manipulate the DOM from WASM. It preserves one simulated or recorded final disposition without
+parsing Kapsel receipts or claiming infrastructure truth.
 
 ## Run the proof
 

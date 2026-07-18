@@ -1,6 +1,6 @@
 # Scope
 
-- **Status:** Active bootstrap contract
+- **Status:** Active experimental contract
 - **Kind:** Normative project scope
 - **Authority:** Canonical for project purpose, first tracer, and non-goals
 - **Owns:** What Grafik is, what the bootstrap proves, and what it does not claim
@@ -13,8 +13,9 @@ product explanations. It is a visual practice and simulation contract, not a gen
 library or another Kapsel product.
 
 A living diagram uses semantic events to evolve one spatial field around explanatory panels.
-Published runs are seeded and replayable. A future simulated adapter and real Kapsel client may
-produce the same semantic vocabulary, but neither belongs in the bootstrap.
+Published runs are seeded and replayable. Simulated and intentionally published recorded results
+enter through one bounded semantic vocabulary before spatial evolution; neither source grants the
+browser infrastructure authority.
 
 ## First tracer
 
@@ -29,10 +30,16 @@ The first tracer proves one end-to-end path:
 7. Replaying the same input and seed yields the same event trace.
 8. Reduced motion applies the final readable state without animated traversal.
 
+## Result seam
+
+The next vertical tracer accepts one simulated or recorded final disposition and preserves it through
+the public renderer-neutral trace. This is not a stable cross-product protocol, receipt parser, live
+Kapsel client, or claim that a recorded result proves infrastructure truth.
+
 ## Non-goals
 
 - Generic animation framework, runtime plugins, or speculative package seams
-- All three receipt outcomes or a second demo
+- Outcome choreography or a second demo
 - Full-screen effects or effects that move readable content
 - DOM access from Rust/WASM
 - Remote gateway integration, hosted service behavior, or infrastructure work

@@ -29,6 +29,8 @@ and exact trace comparison. A replay failure must print the seed and input throu
 
 Required native behaviors:
 
+- all four final dispositions and their simulated or recorded source remain distinct in the public
+  trace and JSON;
 - identical input and seed produce identical complete traces and JSON;
 - invalid or overlapping geometry fails before producing events;
 - grown segments remain outside panel interiors except at selected ports;

@@ -27,6 +27,8 @@ const run = () => {
   const receiptRect = relativeRect(receipt, origin);
   const input = {
     seed: 424242,
+    result_source: "simulated",
+    final_disposition: "SUCCEEDED",
     hero: heroRect,
     receipt: receiptRect,
     hero_port: {

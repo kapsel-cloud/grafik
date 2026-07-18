@@ -110,11 +110,51 @@ impl EdgePort {
     }
 }
 
+/// Provenance of a bounded final result supplied to the simulation.
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ResultSource {
+    /// A generated result that performed no infrastructure work.
+    Simulated,
+    /// An intentionally published result captured from an earlier experiment run.
+    Recorded,
+}
+
+/// Final disposition of one bounded operation.
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum FinalDisposition {
+    /// Local rejection before any receiver attempt; not a receiver result.
+    NotAttempted,
+    /// Receiver facts established the defined successful outcome.
+    Succeeded,
+    /// Receiver facts established the defined failed outcome.
+    Failed,
+    /// Bounded observation established neither success nor failure.
+    Unknown,
+}
+
+impl FinalDisposition {
+    /// Returns the canonical disposition spelling.
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::NotAttempted => "NOT_ATTEMPTED",
+            Self::Succeeded => "SUCCEEDED",
+            Self::Failed => "FAILED",
+            Self::Unknown => "UNKNOWN",
+        }
+    }
+}
+
 /// Complete controlled input for one connector simulation.
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
 pub struct SimulationInput {
     /// Nonzero deterministic replay seed.
     pub seed: u64,
+    /// Whether the final result is simulated or from an intentionally published recording.
+    pub result_source: ResultSource,
+    /// Bounded final operation disposition preserved without reinterpretation.
+    pub final_disposition: FinalDisposition,
     /// Hero panel exclusion rectangle.
     pub hero: Rect,
     /// Receipt panel exclusion rectangle.
@@ -129,6 +169,8 @@ impl SimulationInput {
     /// Creates a complete simulation input.
     pub const fn new(
         seed: u64,
+        result_source: ResultSource,
+        final_disposition: FinalDisposition,
         hero: Rect,
         receipt: Rect,
         hero_port: EdgePort,
@@ -136,6 +178,8 @@ impl SimulationInput {
     ) -> Self {
         Self {
             seed,
+            result_source,
+            final_disposition,
             hero,
             receipt,
             hero_port,
@@ -191,6 +235,10 @@ pub enum SpatialEvent {
 pub struct Trace {
     /// Seed used for every weighted choice.
     pub seed: u64,
+    /// Whether the supplied final result was simulated or recorded.
+    pub result_source: ResultSource,
+    /// Bounded final disposition preserved from the semantic input.
+    pub final_disposition: FinalDisposition,
     /// Ordered renderer-neutral events.
     pub events: Vec<SpatialEvent>,
 }
@@ -290,6 +338,8 @@ pub fn simulate(input: SimulationInput) -> Result<Trace, SimulationError> {
     events.push(SpatialEvent::ConnectorFinished { at_ms: time_ms });
     Ok(Trace {
         seed: input.seed,
+        result_source: input.result_source,
+        final_disposition: input.final_disposition,
         events,
     })
 }
@@ -398,13 +448,16 @@ impl SeededRandom {
 #[cfg(test)]
 mod tests {
     use super::{
-        simulate, Edge, EdgePort, Point, Rect, SimulationError, SimulationInput, SpatialEvent,
+        simulate, Edge, EdgePort, FinalDisposition, Point, Rect, ResultSource, SimulationError,
+        SimulationInput, SpatialEvent,
     };
 
     #[test]
     fn same_seed_and_geometry_replay_the_same_trace() -> Result<(), Box<dyn std::error::Error>> {
         let input = SimulationInput::new(
             42,
+            ResultSource::Simulated,
+            FinalDisposition::Succeeded,
             Rect::new(80.0, 40.0, 320.0, 160.0),
             Rect::new(520.0, 420.0, 360.0, 220.0),
             EdgePort::new(Point::new(240.0, 200.0), Edge::Bottom),
@@ -416,6 +469,35 @@ mod tests {
 
         assert_eq!(first, second);
         assert_eq!(first.to_json()?, second.to_json()?);
+        Ok(())
+    }
+
+    #[test]
+    fn final_dispositions_remain_distinct_in_the_public_trace() -> Result<(), SimulationError> {
+        let dispositions = [
+            FinalDisposition::NotAttempted,
+            FinalDisposition::Succeeded,
+            FinalDisposition::Failed,
+            FinalDisposition::Unknown,
+        ];
+
+        for source in [ResultSource::Simulated, ResultSource::Recorded] {
+            for disposition in dispositions {
+                let mut input = valid_input(73);
+                input.result_source = source;
+                input.final_disposition = disposition;
+                let trace = simulate(input)?;
+                let source_json = match source {
+                    ResultSource::Simulated => "\"result_source\":\"simulated\"",
+                    ResultSource::Recorded => "\"result_source\":\"recorded\"",
+                };
+
+                assert_eq!(trace.result_source, source);
+                assert_eq!(trace.final_disposition, disposition);
+                assert!(trace.to_json()?.contains(source_json));
+                assert!(trace.to_json()?.contains(disposition.as_str()));
+            }
+        }
         Ok(())
     }
 
@@ -528,6 +610,8 @@ mod tests {
     fn valid_input(seed: u64) -> SimulationInput {
         SimulationInput::new(
             seed,
+            ResultSource::Simulated,
+            FinalDisposition::Succeeded,
             Rect::new(80.0, 40.0, 320.0, 160.0),
             Rect::new(520.0, 420.0, 360.0, 220.0),
             EdgePort::new(Point::new(240.0, 200.0), Edge::Bottom),

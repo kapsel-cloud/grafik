@@ -16,9 +16,10 @@ browser geometry -> WASM adapter -> simulation interface -> spatial event trace
                                       browser SVG adapter renders trace
 ```
 
-`grafik::simulate` is the product interface and test surface. Behind it live geometry validation,
-seeded weighted choices, orthogonal route construction, growth timing, and leaf-first retraction.
-Callers provide all geometry and randomness inputs; the module returns data and performs no I/O.
+`grafik::simulate` is the product interface and test surface. Behind it live semantic-result
+preservation, geometry validation, seeded weighted choices, orthogonal route construction, growth
+timing, and leaf-first retraction. Callers provide result provenance, final disposition, geometry,
+and randomness inputs; the module returns data and performs no I/O.
 
 The `wasm` Rust module is a shallow serialization adapter compiled only for `wasm32`. It translates
 browser numbers into the same simulation input used by native tests and returns JSON. It must not
@@ -34,7 +35,9 @@ stays concrete and shallow.
 
 ## Dependency direction
 
-- Domain types and simulation know nothing about WASM, JSON, SVG, CSS, DOM, clocks, or Kapsel.
+- Domain types and simulation know nothing about WASM, JSON, SVG, CSS, DOM, clocks, Kapsel receipt
+  bytes, or Kapsel transport. Adapters translate bounded operation results into Grafik's semantic
+  vocabulary.
 - The WASM adapter depends inward on the simulation interface.
 - Browser adapters depend on the generated WASM interface and spatial event schema.
 - Rendering preferences never flow into simulation; reduced motion changes trace consumption, not

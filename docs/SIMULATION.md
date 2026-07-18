@@ -1,6 +1,6 @@
 # Simulation
 
-- **Status:** Active tracer contract
+- **Status:** Active experimental contract
 - **Kind:** Normative simulation and trace owner
 - **Authority:** Canonical for seeds, controlled time, replay, and spatial event vocabulary
 - **Owns:** Simulation input, deterministic behavior, event ordering, and trace meaning
@@ -8,9 +8,10 @@
 
 ## Interface
 
-The Rust interface accepts a `SimulationInput` containing a nonzero `u64` seed, hero and receipt
-panel rectangles, and selected edge ports. Coordinates are finite CSS-pixel values in one browser
-coordinate space.
+The Rust interface accepts a `SimulationInput` containing a nonzero `u64` seed, result source, final
+disposition, hero and receipt panel rectangles, and selected edge ports. Coordinates are finite
+CSS-pixel values in one browser coordinate space. The source is either `simulated`, which performs
+no infrastructure work, or `recorded`, which identifies an intentionally published earlier result.
 
 `simulate(input)` either returns a complete `Trace` or a validation error. The trace contains the
 seed and ordered spatial events. It performs no I/O and reads no ambient clock or randomness.
@@ -45,8 +46,22 @@ For the same package version and byte-equivalent valid input, repeated calls pro
 leaf-first retraction. Different seeds are allowed to converge when geometry removes optional
 choices; determinism does not promise visual uniqueness.
 
-## Semantic event seam
+## Semantic result seam
 
-The tracer has no Kapsel receipt outcomes. Future simulated and real-client adapters must emit the
-same semantic vocabulary before entering spatial evolution. A simulated run must be identified as
-simulated and perform no infrastructure work.
+The final disposition is exactly one of:
+
+- `NOT_ATTEMPTED`: local rejection before an attempt; it is not receiver `FAILED` or `UNKNOWN`;
+- `SUCCEEDED`: receiver facts established the adapter's defined successful outcome;
+- `FAILED`: receiver facts established the adapter's defined failed outcome; or
+- `UNKNOWN`: bounded observation established neither success nor failure.
+
+Grafik preserves this value and its `simulated` or `recorded` source in the trace without parsing
+receipts or reclassifying the result. For the KAP-0038 adapter, `SUCCEEDED` does not establish
+causation, workload correctness, complete cluster health, or universal capture; `FAILED` does not
+establish permanence or cause; and `UNKNOWN` does not mean the request failed, was not received, or
+was harmless. A timeout remains `UNKNOWN`.
+
+The seam is experimental and intentionally smaller than a cross-product protocol. It accepts no
+receipt bytes, trust decision, operation authority, credentials, private identifiers, or live
+transport. `recorded` identifies provenance, not infrastructure truth, receipt verification, or a
+production claim.
