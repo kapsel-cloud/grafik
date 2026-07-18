@@ -6,6 +6,7 @@ export const segmentAttributes = (event) => ({
   x2: String(event.to.x),
   y2: String(event.to.y),
   pathLength: "1",
+  "data-progress-weight": String(event.weight),
 });
 
 const browserLine = () => document.createElementNS(SVG_NAMESPACE, "line");
@@ -22,8 +23,10 @@ export const renderTrace = (
   },
 ) => {
   group.replaceChildren();
+  const source = trace.result_source === "recorded" ? "Recorded" : "Simulated";
+  const result = `${source} ${trace.final_disposition} result`;
   if (reducedMotion) {
-    announce("Simulated connector complete. Motion reduced.");
+    announce(`${result} applied. Motion reduced.`);
     return () => {};
   }
 
@@ -61,7 +64,7 @@ export const renderTrace = (
       );
     }
     if (event.kind === "connector_finished") {
-      timers.push(schedule(() => announce("Simulated connector complete."), event.at_ms));
+      timers.push(schedule(() => announce(`${result} complete.`), event.at_ms));
     }
   }
 

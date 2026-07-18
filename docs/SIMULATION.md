@@ -29,12 +29,15 @@ wall time only controls how quickly events are displayed and cannot alter route 
 
 ## Spatial events
 
-The tracer emits:
+Every trace emits `connector_started` with selected ports and `connector_finished` with final
+simulation time. For `SUCCEEDED`, the events between them are:
 
-1. `connector_started` with selected ports.
-2. One or more `segment_grew` events with segment index, endpoints, start time, and duration.
-3. Matching `segment_retracted` events in descending index order with start time and duration.
-4. `connector_finished` with the final simulation time.
+1. One or more `segment_grew` events with segment index, seeded progress weight, endpoints, start
+   time, and duration.
+2. Matching `segment_retracted` events in descending index order with start time and duration.
+
+Other dispositions do not reuse successful progress; until their bounded profiles exist, they emit
+no events between connector start and finish.
 
 Events are renderer-neutral coordinates and timing descriptions. They contain no selectors, SVG
 commands, CSS classes, colors, or DOM objects.

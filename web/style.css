@@ -57,6 +57,15 @@ body {
   animation: grow-segment var(--traversal-ms, 160ms) linear forwards;
 }
 
+.connector-segment[data-progress-weight="1"] {
+  opacity: 0.7;
+  stroke-width: 1.5;
+}
+
+.connector-segment[data-progress-weight="3"] {
+  stroke-width: 2.5;
+}
+
 .connector-segment.is-retracting {
   stroke-dashoffset: 0;
   animation: retract-segment var(--traversal-ms, 120ms) linear forwards;

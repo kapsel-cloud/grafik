@@ -205,6 +205,8 @@ pub enum SpatialEvent {
     SegmentGrew {
         /// Stable zero-based segment index.
         index: u8,
+        /// Seeded progress emphasis from 1 through 3.
+        weight: u8,
         /// Simulation time in milliseconds.
         at_ms: u32,
         /// Growth duration in milliseconds.
@@ -309,30 +311,34 @@ pub fn simulate(input: SimulationInput) -> Result<Trace, SimulationError> {
     });
 
     let mut segment_count = 0_u8;
-    for pair in points.windows(2) {
-        let [from, to] = pair else {
-            continue;
-        };
-        let duration_ms = random.range_u16(120, 260);
-        events.push(SpatialEvent::SegmentGrew {
-            index: segment_count,
-            at_ms: time_ms,
-            duration_ms,
-            from: *from,
-            to: *to,
-        });
-        time_ms += u32::from(duration_ms);
-        segment_count += 1;
-    }
+    if input.final_disposition == FinalDisposition::Succeeded {
+        for pair in points.windows(2) {
+            let [from, to] = pair else {
+                continue;
+            };
+            let weight = random.progress_weight();
+            let duration_ms = random.range_u16(120, 260);
+            events.push(SpatialEvent::SegmentGrew {
+                index: segment_count,
+                weight,
+                at_ms: time_ms,
+                duration_ms,
+                from: *from,
+                to: *to,
+            });
+            time_ms += u32::from(duration_ms);
+            segment_count += 1;
+        }
 
-    for index in (0..segment_count).rev() {
-        let duration_ms = random.range_u16(90, 180);
-        events.push(SpatialEvent::SegmentRetracted {
-            index,
-            at_ms: time_ms,
-            duration_ms,
-        });
-        time_ms += u32::from(duration_ms);
+        for index in (0..segment_count).rev() {
+            let duration_ms = random.range_u16(90, 180);
+            events.push(SpatialEvent::SegmentRetracted {
+                index,
+                at_ms: time_ms,
+                duration_ms,
+            });
+            time_ms += u32::from(duration_ms);
+        }
     }
 
     events.push(SpatialEvent::ConnectorFinished { at_ms: time_ms });
@@ -438,6 +444,14 @@ impl SeededRandom {
         usize::from(self.next_u64().to_le_bytes()[0] & 0b11)
     }
 
+    fn progress_weight(&mut self) -> u8 {
+        match self.next_u64().to_le_bytes()[0] % 6 {
+            0 | 1 => 1,
+            2..=4 => 2,
+            _ => 3,
+        }
+    }
+
     fn range_u16(&mut self, minimum: u16, maximum: u16) -> u16 {
         let width = maximum - minimum + 1;
         let sample = u16::from(self.next_u64().to_le_bytes()[0]);
@@ -497,6 +511,35 @@ mod tests {
                 assert!(trace.to_json()?.contains(source_json));
                 assert!(trace.to_json()?.contains(disposition.as_str()));
             }
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn succeeded_uses_weighted_progress_while_other_profiles_remain_empty(
+    ) -> Result<(), SimulationError> {
+        let succeeded = simulate(valid_input(1_337))?;
+        let weights = succeeded.events.iter().filter_map(|event| match event {
+            SpatialEvent::SegmentGrew { weight, .. } => Some(*weight),
+            _ => None,
+        });
+        let weights = weights.collect::<Vec<_>>();
+
+        assert!(!weights.is_empty());
+        assert!(weights.iter().all(|weight| (1..=3).contains(weight)));
+
+        for disposition in [
+            FinalDisposition::NotAttempted,
+            FinalDisposition::Failed,
+            FinalDisposition::Unknown,
+        ] {
+            let mut input = valid_input(1_337);
+            input.final_disposition = disposition;
+            let trace = simulate(input)?;
+            assert!(trace.events.iter().all(|event| !matches!(
+                event,
+                SpatialEvent::SegmentGrew { .. } | SpatialEvent::SegmentRetracted { .. }
+            )));
         }
         Ok(())
     }

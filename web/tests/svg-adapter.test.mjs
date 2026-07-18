@@ -5,10 +5,13 @@ import { renderTrace, segmentAttributes } from "../svg-adapter.js";
 
 const trace = {
   seed: 42,
+  result_source: "recorded",
+  final_disposition: "SUCCEEDED",
   events: [
     {
       kind: "segment_grew",
       index: 0,
+      weight: 2,
       at_ms: 0,
       duration_ms: 120,
       from: { x: 10, y: 20 },
@@ -17,6 +20,7 @@ const trace = {
     {
       kind: "segment_grew",
       index: 1,
+      weight: 1,
       at_ms: 120,
       duration_ms: 140,
       from: { x: 10, y: 40 },
@@ -60,6 +64,7 @@ test("segmentAttributes projects renderer-neutral coordinates", () => {
     x2: "10",
     y2: "40",
     pathLength: "1",
+    "data-progress-weight": "2",
   });
 });
 
@@ -81,12 +86,13 @@ test("reduced motion applies the final state without scheduling", () => {
 
   assert.equal(scheduled, false);
   assert.deepEqual(group.children, []);
-  assert.equal(announcement, "Simulated connector complete. Motion reduced.");
+  assert.equal(announcement, "Recorded SUCCEEDED result applied. Motion reduced.");
 });
 
 test("animated traversal schedules growth and leaf-first removal", () => {
   const group = fakeGroup();
   const jobs = [];
+  let announcement = "";
   renderTrace(trace, {
     group,
     reducedMotion: false,
@@ -94,6 +100,9 @@ test("animated traversal schedules growth and leaf-first removal", () => {
     schedule: (action, at) => {
       jobs.push({ action, at });
       return jobs.length;
+    },
+    announce: (message) => {
+      announcement = message;
     },
   });
 
@@ -108,4 +117,5 @@ test("animated traversal schedules growth and leaf-first removal", () => {
   );
   assert.equal(group.children.length, 2);
   assert.equal(group.children.every((line) => line.removed), true);
+  assert.equal(announcement, "Recorded SUCCEEDED result complete.");
 });

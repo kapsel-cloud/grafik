@@ -31,8 +31,9 @@ One absolutely positioned, `aria-hidden` SVG covers the diagram stage. The adapt
 spatial segment into one SVG line. Growth appends lines in event order; retraction removes them from
 the leaf. The SVG uses `pointer-events: none` and never enters panel stacking or reading order.
 
-The adapter consumes the public JSON event vocabulary directly. It may schedule with browser time,
-but must not reinterpret seeded choices.
+The adapter consumes the public JSON event vocabulary directly. For successful progress, it maps
+seeded weights 1 through 3 to subtle line emphasis without adding events or changing result meaning.
+It may schedule with browser time, but must not reinterpret seeded choices.
 
 ## Reduced motion
 

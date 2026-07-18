@@ -1,6 +1,6 @@
 # Spatial patterns
 
-- **Status:** Active vocabulary; tracer budgets only
+- **Status:** Active vocabulary and bounded profile contract
 - **Kind:** Normative spatial-field contract
 - **Authority:** Canonical for spatial terms, route invariants, and bounded pattern profiles
 - **Owns:** Field vocabulary, exclusion rules, and density/lifetime/velocity/chaos limits
@@ -40,11 +40,22 @@ Tracer budgets:
 | Chaos | One seeded lateral route choice; no branching |
 | Lifetime | Every grown segment is retracted in the same trace |
 
+## Succeeded progress profile
+
+`SUCCEEDED` uses the tracer connector as weighted progress. Each grown segment receives one seeded
+weight from 1 through 3; weight 2 is most common, weight 1 is next, and weight 3 is rare. The browser
+may project weight as subtle stroke emphasis, but HTML states the result independently. Growth keeps
+the 120–260 ms segment budget, retraction remains leaf-first at 90–180 ms per segment, density stays
+at five live segments or fewer, and direction remains orthogonal with no branching. The one seeded
+lateral route choice is the entire chaos budget.
+
+For final dispositions other than `SUCCEEDED`, this profile emits no segment growth or retraction.
+Their outcome cues remain separate vertical tracers rather than reusing successful progress.
+
 ## Future bounded profiles
 
 These names reserve vocabulary, not implementation scope:
 
-- `SUCCEEDED`: weighted progress growth and retraction; direction may change.
 - `FAILED`: brief, subtle, element-local glitch, preferably on the selected control.
 - `UNKNOWN`: usually one or two `?` symbols; rare bounded clustering.
 - Ambient drift: independent sparse growth with coordinate changes every 7–11 seconds.
