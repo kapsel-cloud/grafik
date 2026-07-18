@@ -9,6 +9,7 @@ const status = document.querySelector("[data-status]");
 const motion = matchMedia("(prefers-reduced-motion: reduce)");
 let stopTrace = () => {};
 let resizeTimer;
+let recordedResult;
 
 const relativeRect = (element, origin) => {
   const rect = element.getBoundingClientRect();
@@ -21,14 +22,15 @@ const relativeRect = (element, origin) => {
 };
 
 const run = () => {
+  if (!recordedResult) return;
   stopTrace();
   const origin = diagram.getBoundingClientRect();
   const heroRect = relativeRect(hero, origin);
   const receiptRect = relativeRect(receipt, origin);
   const input = {
     seed: 424242,
-    result_source: "simulated",
-    final_disposition: "SUCCEEDED",
+    result_source: recordedResult.result_source,
+    final_disposition: recordedResult.final_disposition,
     hero: heroRect,
     receipt: receiptRect,
     hero_port: {
@@ -55,9 +57,17 @@ const run = () => {
   }
 };
 
+const loadRecordedResult = async () => {
+  const response = await fetch("./fixtures/kapsel-recorded-success.json");
+  if (!response.ok) throw new Error(`recorded result returned HTTP ${response.status}`);
+  const fixture = await response.json();
+  return fixture.result;
+};
+
 const start = async () => {
   try {
-    await Promise.all([init(), document.fonts.ready]);
+    const [, , result] = await Promise.all([init(), document.fonts.ready, loadRecordedResult()]);
+    recordedResult = result;
     run();
   } catch (error) {
     status.textContent = `Grafik could not start: ${String(error)}`;

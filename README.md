@@ -26,9 +26,10 @@ cargo make wasm
 cargo make serve
 ```
 
-Open `http://127.0.0.1:4173`. The browser measures the hero and receipt panels, selects edge ports,
-asks WASM for a seeded trace, and renders it through SVG. Reduced-motion users receive the final
-readable state without animated traversal.
+Open `http://127.0.0.1:4173`. The browser loads one sanitized recorded KAP-0038 result, measures the
+hero and receipt panels, asks WASM for a seeded trace, and renders it through SVG. This remains a
+simulated, non-production presentation. Reduced-motion users receive the final readable state
+without animated traversal.
 
 ## Read next
 

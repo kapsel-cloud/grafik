@@ -13,8 +13,9 @@ Run the narrowest proof first:
 1. Native interface tests prove geometry validation, deterministic replay, event ordering, route
    exclusion, and bounded timing through `grafik::simulate`.
 2. WASM build proof verifies the shallow adapter compiles and generates browser bindings.
-3. Dependency-free Node tests prove the concrete SVG adapter projects growth/retraction and applies
-   reduced-motion traces without scheduling.
+3. Dependency-free Node tests prove the recorded fixture is bounded and publishable, and the
+   concrete SVG adapter projects growth/retraction and applies reduced-motion traces without
+   scheduling.
 4. Manual browser proof checks real geometry, SVG placement, resize behavior, no-JavaScript reading,
    reduced motion, 320 CSS-pixel reflow, and console errors.
 5. `cargo make check` is the complete local default gate.

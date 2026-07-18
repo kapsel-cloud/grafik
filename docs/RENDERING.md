@@ -13,6 +13,18 @@ stage's local coordinate space. It selects the bottom-center hero port and top-c
 and sends both rectangles and ports to WASM. It reruns the tracer after a debounced resize. Geometry measurement is browser work;
 Rust never queries or mutates the DOM.
 
+## Recorded result adapter
+
+The browser loads `fixtures/kapsel-recorded-success.json`, takes only its `result_source` and
+`final_disposition`, and passes them with measured geometry into WASM. The fixture is a sanitized
+record of the supported KAP-0038 disposable-kind demonstration at its stated source revision. It is
+not a receipt, trust decision, live operation, or stable cross-product format.
+
+The fixture identifies a recorded run, simulated presentation, and non-production status. Its
+provenance is limited to the producer experiment/version, source revision, regeneration command, and
+synthetic public operation identifier. It contains no credentials, grants, seeds, kubeconfig,
+journal, receipt bytes or digest, trust material, private paths, cluster identities, or timing.
+
 ## SVG adapter
 
 One absolutely positioned, `aria-hidden` SVG covers the diagram stage. The adapter converts each
