@@ -134,18 +134,6 @@ pub enum FinalDisposition {
     Unknown,
 }
 
-impl FinalDisposition {
-    /// Returns the canonical disposition spelling.
-    pub const fn as_str(self) -> &'static str {
-        match self {
-            Self::NotAttempted => "NOT_ATTEMPTED",
-            Self::Succeeded => "SUCCEEDED",
-            Self::Failed => "FAILED",
-            Self::Unknown => "UNKNOWN",
-        }
-    }
-}
-
 /// Complete controlled input for one connector simulation.
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
 pub struct SimulationInput {
@@ -505,11 +493,17 @@ mod tests {
                     ResultSource::Simulated => "\"result_source\":\"simulated\"",
                     ResultSource::Recorded => "\"result_source\":\"recorded\"",
                 };
+                let disposition_json = match disposition {
+                    FinalDisposition::NotAttempted => "NOT_ATTEMPTED",
+                    FinalDisposition::Succeeded => "SUCCEEDED",
+                    FinalDisposition::Failed => "FAILED",
+                    FinalDisposition::Unknown => "UNKNOWN",
+                };
 
                 assert_eq!(trace.result_source, source);
                 assert_eq!(trace.final_disposition, disposition);
                 assert!(trace.to_json()?.contains(source_json));
-                assert!(trace.to_json()?.contains(disposition.as_str()));
+                assert!(trace.to_json()?.contains(disposition_json));
             }
         }
         Ok(())

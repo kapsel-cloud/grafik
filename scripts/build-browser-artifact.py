@@ -42,7 +42,7 @@ for name in BROWSER_FILES:
     destination.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(WEB / name, destination)
 
-tree_state = "dirty" if output("git", "status", "--porcelain", "--untracked-files=no") else "clean"
+tree_state = "dirty" if output("git", "status", "--porcelain") else "clean"
 manifest = {
     "artifact_format": 1,
     "classification": {

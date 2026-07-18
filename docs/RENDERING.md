@@ -21,8 +21,8 @@ record of the supported KAP-0038 disposable-kind demonstration at its stated sou
 not a receipt, trust decision, live operation, or stable cross-product format.
 
 The fixture identifies a recorded run, simulated presentation, and non-production status. Its
-provenance is limited to the producer experiment/version, source revision, regeneration command, and
-synthetic public operation identifier. It contains no credentials, grants, seeds, kubeconfig,
+provenance is limited to the producer experiment/package version, exact post-tag source revision and
+description, regeneration command, and synthetic public operation identifier. It contains no credentials, grants, seeds, kubeconfig,
 journal, receipt bytes or digest, trust material, private paths, cluster identities, or timing.
 
 ## SVG adapter

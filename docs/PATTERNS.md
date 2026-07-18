@@ -50,7 +50,8 @@ at five live segments or fewer, and direction remains orthogonal with no branchi
 lateral route choice is the entire chaos budget.
 
 For final dispositions other than `SUCCEEDED`, this profile emits no segment growth or retraction.
-Their outcome cues remain separate vertical tracers rather than reusing successful progress.
+`FAILED` and `UNKNOWN` remain separate vertical tracers rather than reusing successful progress;
+`NOT_ATTEMPTED` remains a pre-attempt disposition, not a receiver cue.
 
 ## Future bounded profiles
 

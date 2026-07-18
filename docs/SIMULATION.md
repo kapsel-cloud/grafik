@@ -36,8 +36,8 @@ simulation time. For `SUCCEEDED`, the events between them are:
    time, and duration.
 2. Matching `segment_retracted` events in descending index order with start time and duration.
 
-Other dispositions do not reuse successful progress; until their bounded profiles exist, they emit
-no events between connector start and finish.
+Other dispositions do not reuse successful progress and emit no events between connector start and
+finish.
 
 Events are renderer-neutral coordinates and timing descriptions. They contain no selectors, SVG
 commands, CSS classes, colors, or DOM objects.

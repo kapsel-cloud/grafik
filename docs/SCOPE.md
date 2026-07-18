@@ -39,7 +39,7 @@ Kapsel client, or claim that a recorded result proves infrastructure truth.
 ## Non-goals
 
 - Generic animation framework, runtime plugins, or speculative package seams
-- Failed/unknown outcome choreography or a second demo
+- Non-success outcome choreography or a second demo
 - Full-screen effects or effects that move readable content
 - DOM access from Rust/WASM
 - Remote gateway integration, hosted service behavior, or infrastructure work

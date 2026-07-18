@@ -10,8 +10,9 @@
   },
   "provenance": {
     "producer": "Kapsel KAP-0038",
-    "producer_version": "0.1.0",
+    "producer_package_version": "0.1.0",
     "source_revision": "1f8cca9b7c565fc5aed940364aa5e65a3a208120",
+    "source_revision_description": "v0.1.0-3-g1f8cca9",
     "command": "cargo make demo-kind",
     "operation_id": "demo-healthy-op"
   },
