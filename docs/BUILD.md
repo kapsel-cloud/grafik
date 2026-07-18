@@ -32,8 +32,8 @@ cargo make ci
 ```
 
 The gate checks Rust formatting and 100-byte source width, whitespace, Clippy, rustdoc, native tests,
-WASM compilation/bindings, and browser-adapter tests. It is deterministic and requires no live
-service.
+WASM compilation/bindings, browser-artifact attribution and checksums, and browser-adapter tests. It
+is deterministic and requires no live service.
 
 ## Narrow commands
 
@@ -43,12 +43,25 @@ cargo make test        # native library and documentation tests
 cargo make lint        # Clippy with warnings denied
 cargo make docs        # warning-free rustdoc
 cargo make wasm        # produce web/pkg/grafik.js and grafik_bg.wasm
+cargo make artifact    # produce the attributable browser proof in dist
+cargo make test-artifact # validate artifact metadata and SHA-256 checksums
 cargo make test-web    # dependency-free Node tests for the SVG adapter
 cargo make fmt         # rewrite Rust formatting
 cargo make fmt-check   # check Rust formatting and source width
 ```
 
 Use the narrowest command while iterating, then run the default gate.
+
+## Browser artifact
+
+`cargo make artifact` replaces `dist/` with browser JavaScript, WASM, static assets, and an
+`artifact.json` manifest. The manifest records the source revision, source-tree state, exact tool
+version output, and an explicit experimental/non-production classification. `SHA256SUMS` covers all
+other files in sorted path order. Generated artifacts are ignored by Git.
+
+The command is deterministic for the same source tree and pinned toolchain. This is a build contract,
+not a reproducible-build claim; make that claim only after comparing two clean builds in isolated
+environments.
 
 ## Browser tracer
 

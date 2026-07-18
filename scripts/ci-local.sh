@@ -22,8 +22,8 @@ cargo test --locked --workspace --lib --tests
 printf '%s\n' "==> documentation tests"
 cargo test --locked --workspace --doc
 
-printf '%s\n' "==> WASM bindings"
-cargo make wasm
+printf '%s\n' "==> attributable browser artifact"
+cargo make test-artifact
 
 printf '%s\n' "==> browser adapter tests"
 node --test web/tests/*.test.mjs

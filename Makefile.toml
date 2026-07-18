@@ -68,6 +68,18 @@ args = ["--target", "web", "--out-dir", "web/pkg", "--out-name", "grafik", "targ
 description = "Build browser-ready WASM bindings"
 dependencies = ["wasm-bindgen"]
 
+[tasks.artifact]
+description = "Produce an attributable browser artifact in dist"
+dependencies = ["wasm"]
+command = "python3"
+args = ["scripts/build-browser-artifact.py"]
+
+[tasks.test-artifact]
+description = "Validate browser artifact attribution and checksums"
+dependencies = ["artifact"]
+command = "python3"
+args = ["scripts/test-browser-artifact.py"]
+
 [tasks.test-web]
 description = "Run dependency-free browser-adapter tests"
 command = "node"
