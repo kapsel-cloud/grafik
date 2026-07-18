@@ -245,7 +245,7 @@ dd {
 @keyframes failure-glitch {
   20%,
   75% {
-    opacity: 0.72;
+    opacity: 0.38;
   }
   45% {
     transform: translate(var(--glitch-y, 0), var(--glitch-x, 0));
@@ -255,7 +255,7 @@ dd {
 @keyframes question-pop {
   18%,
   72% {
-    opacity: 0.8;
+    opacity: 0.58;
     transform: translate(-50%, -50%) scale(1) rotate(5deg);
   }
   to {
