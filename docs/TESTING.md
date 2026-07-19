@@ -21,7 +21,7 @@ Run the narrowest proof first:
 5. Manual browser proof checks the candidate grid, clickable interactions, real geometry, connector
    placement, resize behavior, no-JavaScript reading, reduced motion, 320 CSS-pixel reflow, and console
    errors.
-5. `cargo make check` is the complete local default gate.
+6. `cargo make check` is the complete local default gate.
 
 Tests exercise public interfaces. Moving a test outward must not widen the production interface.
 
@@ -44,6 +44,39 @@ Required native behaviors:
   limits independently asserted;
 - `NOT_ATTEMPTED` emits no receiver cue;
 - every profile's density, lifetime, displacement, and duration remain within `PATTERNS.md` budgets.
+
+## Snapshot vocabulary and policy
+
+Use distinct names for distinct state:
+
+- A **conformance snapshot** is a reviewed, committed, exact serialized input/output example for one
+  public Rust or WASM interface.
+- A **variation** is a user-authored set of effect parameter values. It is product data, not test
+  evidence.
+- A **checkpoint** is a time-aware observation in a displayed flow. It is domain data, not a saved
+  editor state or test artifact.
+- A **visual baseline** is a screenshot produced in a pinned browser environment. It proves concrete
+  rendering only and cannot replace semantic or invariant tests.
+
+Conformance snapshots complement, never replace, direct assertions. Use direct tests for validation,
+budgets, graph invariants, error behavior, and properties across seed corpora. Use snapshots for
+complete stable examples whose accidental field, ordering, identifier, or timing drift must be
+reviewed as a contract change.
+
+A conformance snapshot contains an explicit case name, schema version, byte-equivalent input, and
+byte-equivalent output. Inputs include every seed, time, geometry rectangle, interaction, and budget;
+they contain no ambient values. Snapshot serializers use stable struct order and sorted collections;
+production snapshot surfaces must not expose unordered maps.
+
+Snapshot updates are a review operation, not a test side effect. The check path never rewrites a
+committed baseline. An update path writes received candidates outside the committed baseline tree,
+then requires an explicit per-file accept or reject step. Do not bulk-accept unexplained changes.
+Every accepted change states which contract changed and why. CI runs snapshot checks but never the
+accept path.
+
+Pin a small representative corpus rather than every seed: one minimal case, each closed component or
+effect kind, each semantic result, one maximum-budget case, one reduced-motion trace, and named rare
+seeds. Property tests continue to scan wider seed ranges for invariant and budget failures.
 
 Required receipt-scene behaviors:
 
