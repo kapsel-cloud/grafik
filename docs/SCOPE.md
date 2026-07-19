@@ -8,14 +8,16 @@
 
 ## Purpose
 
-Grafik is an open-source explanation system for seeded living diagrams and executable Kapsel
-product explanations. It is a visual practice and simulation contract, not a generic animation
-library or another Kapsel product.
+Grafik is an open-source explanation system for seeded living diagrams and executable product
+explanations. It is a visual practice and simulation contract, not a generic animation library or
+another Kapsel product.
 
 A living diagram uses semantic events to evolve one spatial field around explanatory panels.
 Published runs are seeded and replayable. Simulated and intentionally published recorded results
 enter through one bounded semantic vocabulary before spatial evolution; neither source grants the
-browser infrastructure authority.
+browser infrastructure authority. Product-specific meaning and data mapping, brand styling, browser
+geometry, and accessibility remain in downstream adapters such as kapsel.cloud; Grafik owns the
+renderer-neutral scene tree generated from that bounded display content.
 
 ## First tracer
 
@@ -32,18 +34,32 @@ The first tracer proves one end-to-end path:
 
 ## Result seam
 
-The next vertical tracer accepts one simulated or recorded final disposition and preserves it through
-the public renderer-neutral trace. This is not a stable cross-product protocol, receipt parser, live
+The result tracer accepts one simulated or recorded final disposition and preserves it through the
+public renderer-neutral trace. This is not a stable cross-product protocol, receipt parser, live
 Kapsel client, or claim that a recorded result proves infrastructure truth.
+
+## Receipt-scene tracer
+
+The next vertical tracer generates one complete, renderer-neutral receipt scene from bounded content,
+an explicit seed, one curated recipe, and hard budgets. Rust owns the content/layout tree, diagram
+topology, style roles, effect targets, seeded pattern application, phase ordering, and interaction
+script. The browser renders those roles, measures actual node rectangles and ports, and returns that
+geometry for a complete timed trace.
+
+“Rust-owned view” means a typed scene plan, not Rust-authored HTML, SVG, CSS, or DOM mutation. Receipt
+content remains caller-provided data; Grafik does not parse Kapsel receipts or define product result
+meaning. The standalone Grafik lab is the development and review adapter. A downstream product should
+need only the generated WASM, two JSON calls, and its concrete renderer.
 
 ## Non-goals
 
 - Generic animation framework, runtime plugins, or speculative package seams
-- A second demo or live outcome transport
+- A second product showcase or live outcome transport
 - Full-screen effects or effects that move readable content
 - DOM access from Rust/WASM
 - Remote gateway integration, hosted service behavior, or infrastructure work
 - Browser credentials, Kubernetes authority, or Kapsel owner signing keys
+- A Kapsel receipt schema, brand renderer, or source-level dependency on kapsel.cloud
 - Stable public compatibility or production-readiness claims
 
 ## Exit condition

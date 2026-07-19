@@ -6,7 +6,29 @@
 - **Owns:** DOM measurement, port selection, trace consumption, visual projection, and motion policy
 - **Does not own:** Seeded choices, route evolution, event ordering, or semantic outcome meaning
 
-## Geometry adapter
+## Receipt-scene adapter
+
+The browser receives one complete scene plan and renders its stable node tree as semantic HTML in
+logical order. It maps grid roles to responsive CSS, visual roles to theme tokens, button-size roles
+to accessible native controls, and diagram topology to DOM/SVG structure. Rust supplies no markup,
+selectors, fonts, literal colors, breakpoints, or focus behavior.
+
+The browser adapter must render these primitives: bounded text, facts, lists, tables, result blocks,
+native actions, native menus, and the four diagram forms. A single concrete adapter serves every
+scene in the standalone grid lab. Variation comes from scene plans, not separate rendering
+implementations.
+
+After fonts and layout settle, the browser reports rectangles and selected ports keyed by every
+stable node ID required by the plan. Diagram connector and packet endpoints use those measured
+anchors with a small visual overlap under node boundaries; the adapter must not maintain an
+independent coordinate model. Resize causes remeasurement and resimulation of the same plan, never
+scene regeneration.
+
+The adapter maps load and click events to declared stable interaction IDs. It must update native
+pressed, selected, focus, and expanded state before applying decorative events. It does not invent
+randomness, reorder phases, retarget effects, or let decorative overlays receive pointer events.
+
+## Outcome-tracer geometry adapter
 
 After fonts and layout are ready, the browser reads hero and receipt rectangles in the diagram
 stage's local coordinate space. It selects the bottom-center hero port and top-center receipt port
@@ -49,6 +71,9 @@ panel borders, status text, and the no-JavaScript fallback remain readable witho
 
 ## Accessibility and resilience
 
+- The scene tree defines logical reading order; visual grid placement must not change DOM order.
+- Generated lists and tables use native elements, headers, and captions from bounded content.
+- Generated actions and menus use native controls with stable accessible names and visible focus.
 - Motion is decorative and hidden from assistive technology.
 - Native buttons expose the three receiver outcomes and state selection with `aria-pressed`.
 - A live status announces the selected result profile or a readable failure.

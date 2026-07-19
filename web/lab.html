@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#e5e2d9" />
+    <meta
+      name="description"
+      content="Standalone Grafik lab for seeded renderer-neutral receipt scenes."
+    />
+    <title>Grafik scene lab</title>
+    <link rel="stylesheet" href="./style.css" />
+    <link rel="stylesheet" href="./lab.css" />
+    <script type="module" src="./lab.js"></script>
+  </head>
+  <body class="lab-body">
+    <header class="lab-header">
+      <div>
+        <p class="kicker">Standalone Grafik lab · simulated content · current worktree</p>
+        <h1>Seeded receipt scene workshop</h1>
+        <p class="lab-intro">
+          Rust generates each view tree, grid role, diagram, button size, pattern, phase, and
+          interaction script. This browser adapter only renders and measures the plans.
+        </p>
+      </div>
+      <div class="lab-controls" aria-label="Scene generation controls">
+        <label>seed <input data-seed type="number" min="1" value="424242" /></label>
+        <label>
+          recipe
+          <select data-recipe>
+            <option value="calm">calm</option>
+            <option value="balanced" selected>balanced</option>
+            <option value="vivid">vivid</option>
+          </select>
+        </label>
+        <button type="button" data-window-step="-6">Previous six</button>
+        <button type="button" data-window-step="6">Next six</button>
+      </div>
+      <p class="lab-status" data-status aria-live="polite">Building local WASM scenes…</p>
+    </header>
+
+    <main class="lab-main">
+      <section class="scene-gallery" data-gallery aria-label="Generated receipt scenes"></section>
+
+      <aside class="scene-inspector" aria-label="Selected scene inspector">
+        <div class="inspector-heading">
+          <div>
+            <p class="kicker">Selected candidate</p>
+            <h2 data-selection-title>Select a generated scene</h2>
+          </div>
+          <button type="button" data-replay-selected disabled>Replay selected</button>
+        </div>
+        <details open>
+          <summary>Scene plan</summary>
+          <pre data-scene-json>Waiting for selection…</pre>
+        </details>
+        <details>
+          <summary>Latest interaction trace</summary>
+          <pre data-trace-json>No interaction yet.</pre>
+        </details>
+      </aside>
+    </main>
+
+    <footer class="lab-footer">
+      Grafik-only files · no sibling checkout · no live service · no credentials · experimental
+      schema
+    </footer>
+  </body>
+</html>

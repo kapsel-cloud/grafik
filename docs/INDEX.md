@@ -9,8 +9,8 @@
 | Question | Owner |
 | --- | --- |
 | What is Grafik and what is out of scope? | [`SCOPE.md`](SCOPE.md) |
-| Which module owns simulation and which direction may dependencies flow? | [`ARCHITECTURE.md`](ARCHITECTURE.md) |
-| What are panels, ports, fields, patterns, and spatial budgets? | [`PATTERNS.md`](PATTERNS.md) |
+| Which module owns scene generation and which direction may dependencies flow? | [`ARCHITECTURE.md`](ARCHITECTURE.md) |
+| What are scene nodes, layouts, diagrams, patterns, and spatial budgets? | [`PATTERNS.md`](PATTERNS.md) |
 | What are seeds, time, events, replay, and determinism? | [`SIMULATION.md`](SIMULATION.md) |
 | What does the browser measure and render? | [`RENDERING.md`](RENDERING.md) |
 | Which commands and prerequisites are real? | [`BUILD.md`](BUILD.md) |

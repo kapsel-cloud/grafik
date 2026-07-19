@@ -10,14 +10,17 @@
 
 Run the narrowest proof first:
 
-1. Native interface tests prove geometry validation, deterministic replay, event ordering, route
-   exclusion, and bounded timing through `grafik::simulate`.
-2. WASM build proof verifies the shallow adapter compiles and generates browser bindings.
-3. Dependency-free Node tests prove the recorded fixture is bounded and publishable, and the
-   concrete SVG adapter projects growth/retraction and applies reduced-motion traces without
-   scheduling.
-4. Manual browser proof checks real geometry, SVG placement, resize behavior, no-JavaScript reading,
-   reduced motion, 320 CSS-pixel reflow, and console errors.
+1. Native interface tests prove deterministic scene generation, budget enforcement, stable tree and
+   topology IDs, measured-geometry validation, interaction ordering, route exclusion, and bounded
+   timing through `grafik::generate_scene` and `grafik::simulate_scene`.
+2. Existing native outcome-tracer tests remain until that implementation is absorbed.
+3. WASM build proof verifies the shallow adapter compiles and generates browser bindings.
+4. Dependency-free Node tests prove the standalone lab uses only local Grafik assets and the concrete
+   adapter maps every scene primitive, measured anchor, interaction, and reduced-motion trace without
+   ambient randomness.
+5. Manual browser proof checks the candidate grid, clickable interactions, real geometry, connector
+   placement, resize behavior, no-JavaScript reading, reduced motion, 320 CSS-pixel reflow, and console
+   errors.
 5. `cargo make check` is the complete local default gate.
 
 Tests exercise public interfaces. Moving a test outward must not widen the production interface.
@@ -41,6 +44,22 @@ Required native behaviors:
   limits independently asserted;
 - `NOT_ATTEMPTED` emits no receiver cue;
 - every profile's density, lifetime, displacement, and duration remain within `PATTERNS.md` budgets.
+
+Required receipt-scene behaviors:
+
+- byte-equivalent request and seed produce identical complete scene plans and JSON;
+- separate random streams keep layout stable when only effect timing implementation changes;
+- invalid content or impossible budgets fail before seeded choices advance;
+- all scene trees remain within node/depth limits and use unique stable IDs;
+- lists, tables, actions, menus, and every diagram form survive serialization;
+- every diagram edge references existing topology nodes;
+- every effect references an existing target and every action references a bounded script;
+- button sizes, layouts, diagrams, pattern profiles, and phases vary across a pinned seed corpus;
+- byte-equivalent plan, geometry, and interaction produce identical complete traces and JSON;
+- missing, duplicate, stale, or non-finite measured geometry is rejected;
+- every live-effect, density, lifetime, displacement, fragment, phase, and total-duration budget holds;
+- no event can target or move readable text; and
+- the complete default gate reads or writes no sibling checkout.
 
 ## Browser evidence
 

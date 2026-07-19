@@ -16,20 +16,24 @@ Grafik does not connect to Kubernetes or a Kapsel gateway, does not hold credent
 manipulate the DOM from WASM. It preserves one simulated or recorded final disposition without
 parsing Kapsel receipts or claiming infrastructure truth.
 
-## Run the proof
+## Develop independently
 
 Prerequisites and exact commands are owned by [`docs/BUILD.md`](docs/BUILD.md).
 
 ```sh
 cargo make check
-cargo make wasm
-cargo make serve
+cargo make lab
 ```
 
-Open `http://127.0.0.1:4173`. The browser loads one sanitized recorded KAP-0038 result, measures the
-hero and receipt panels, asks WASM for a seeded trace, and renders it through SVG. This remains a
-simulated, non-production presentation. Reduced-motion users receive the final readable state
-without animated traversal.
+Open `http://127.0.0.1:4174/lab.html`. The standalone lab builds and serves files from this Grafik
+checkout only. It uses simulated inputs, exposes the complete trace, and neither requires nor changes
+a kapsel.cloud checkout, so both repositories can be developed in parallel.
+
+The recorded-result proof remains available with `cargo make wasm && cargo make serve` at
+`http://127.0.0.1:4174`. It loads one sanitized recorded KAP-0038 result, measures the hero and
+receipt panels, asks WASM for a seeded trace, and renders it through SVG. This remains a simulated,
+non-production presentation. Reduced-motion users receive the final readable state without animated
+traversal.
 
 ## Read next
 

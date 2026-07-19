@@ -7,10 +7,23 @@
 use core::fmt;
 use serde::{Deserialize, Serialize};
 
+mod scene;
+pub use scene::{
+    generate_scene, simulate_scene, ActionContent, ButtonSize, DiagramEdge, DiagramForm,
+    DiagramNode, DiagramPlan, EffectParameters, EffectPattern, EffectPhase, EffectPlan,
+    EffectTarget, FactContent, GridRole, InteractionScript, InteractionTrigger, LayoutProfile,
+    NodeGeometry, ReceiptContent, SceneAction, SceneBudgets, SceneError, SceneEvent, SceneNode,
+    SceneNodeContent, SceneNodeKind, ScenePlan, SceneRecipe, SceneRequest, SceneSimulationInput,
+    SceneTrace, VisualRole,
+};
+
 #[cfg(target_arch = "wasm32")]
 mod wasm;
 #[cfg(target_arch = "wasm32")]
-pub use wasm::grafik_trace;
+pub use wasm::{grafik_scene, grafik_scene_trace, grafik_trace};
+
+#[cfg(test)]
+mod scene_tests;
 
 const CLEARANCE: f64 = 8.0;
 const MINIMUM_GAP: f64 = CLEARANCE * 2.0;

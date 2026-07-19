@@ -86,9 +86,15 @@ command = "node"
 args = ["--test", "web/tests/svg-adapter.test.mjs"]
 
 [tasks.serve]
-description = "Serve the browser tracer on http://127.0.0.1:4173"
+description = "Serve the browser tracer on http://127.0.0.1:4174"
 command = "python3"
-args = ["-m", "http.server", "4173", "--bind", "127.0.0.1", "--directory", "web"]
+args = ["-m", "http.server", "4174", "--bind", "127.0.0.1", "--directory", "web"]
+
+[tasks.lab]
+description = "Build WASM and serve the standalone lab on http://127.0.0.1:4174/lab.html"
+dependencies = ["wasm"]
+command = "python3"
+args = ["-m", "http.server", "4174", "--bind", "127.0.0.1", "--directory", "web"]
 
 [tasks.clean]
 command = "cargo"

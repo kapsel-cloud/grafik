@@ -43,6 +43,7 @@ cargo make test        # native library and documentation tests
 cargo make lint        # Clippy with warnings denied
 cargo make docs        # warning-free rustdoc
 cargo make wasm        # produce web/pkg/grafik.js and grafik_bg.wasm
+cargo make lab         # build WASM and serve the standalone Grafik lab
 cargo make artifact    # produce the attributable browser proof in dist
 cargo make test-artifact # validate artifact metadata and SHA-256 checksums
 cargo make test-web    # dependency-free Node tests for the SVG adapter
@@ -63,19 +64,33 @@ The command is deterministic for the same source tree and pinned toolchain. This
 not a reproducible-build claim; make that claim only after comparing two clean builds in isolated
 environments.
 
+## Standalone development lab
+
+```sh
+cargo make lab
+```
+
+Open `http://127.0.0.1:4174/lab.html`. The command builds the current WASM bindings and serves only
+Grafik's `web/` directory. Port 4174 is deliberately distinct from kapsel.cloud's local port so both
+can run in parallel. The lab uses simulated inputs and does not require, read, or modify a
+kapsel.cloud checkout. Use its seed and recipe URL parameters for exact local replay.
+
+Do not point this command at another repository, add a cross-repository symlink, or automate copying
+into a sibling checkout. A downstream integration should select a Grafik revision or attributable
+artifact explicitly and make its own reviewed repository change.
+
 ## Browser tracer
 
-Build bindings before serving:
+Build bindings before serving the recorded-result tracer:
 
 ```sh
 cargo make wasm
 cargo make serve
 ```
 
-Open `http://127.0.0.1:4173`. `serve` runs
-`python3 -m http.server 4173 --bind 127.0.0.1 --directory web` and remains in the foreground until
-interrupted. No generated binding is committed; rerun `cargo make wasm`
-after Rust changes.
+Open `http://127.0.0.1:4174`. `serve` runs
+`python3 -m http.server 4174 --bind 127.0.0.1 --directory web` and remains in the foreground until
+interrupted. No generated binding is committed; rerun `cargo make wasm` after Rust changes.
 
 ## Authoritative inputs
 
