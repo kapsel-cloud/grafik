@@ -1,6 +1,6 @@
 [package]
 name = "grafik"
-version = "0.1.0"
+version = "0.1.0-alpha.1"
 edition = "2021"
 authors = ["Kapsel Contributors"]
 license = "Apache-2.0"
@@ -10,15 +10,21 @@ documentation = "https://docs.rs/grafik"
 description = "Living diagrams for executable product explanations"
 readme = "README.md"
 rust-version = "1.97"
-publish = false
+publish = ["crates-io"]
 keywords = ["visualization", "simulation", "wasm", "diagrams"]
 categories = ["visualization", "wasm"]
 include = [
   "/src/**",
-  "/web/**",
   "/docs/**",
   "/tasks/**",
   "/scripts/**",
+  "/web/*.html",
+  "/web/*.css",
+  "/web/*.js",
+  "/web/package.json",
+  "/web/fixtures/**",
+  "/web/tests/**",
+  "/web/pkg/.gitkeep",
   "/Cargo.toml",
   "/Cargo.lock",
   "/Makefile.toml",
