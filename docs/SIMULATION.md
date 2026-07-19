@@ -106,12 +106,11 @@ The final disposition is exactly one of:
 - `UNKNOWN`: bounded observation established neither success nor failure.
 
 Grafik preserves this value and its `simulated` or `recorded` source in the trace without parsing
-receipts or reclassifying the result. For the KAP-0038 adapter, `SUCCEEDED` does not establish
-causation, workload correctness, complete cluster health, or universal capture; `FAILED` does not
-establish permanence or cause; and `UNKNOWN` does not mean the request failed, was not received, or
-was harmless. A timeout remains `UNKNOWN`.
+source records or reclassifying the result. `SUCCEEDED` establishes only the consumer adapter's
+defined outcome; `FAILED` does not establish permanence or cause; and `UNKNOWN` does not mean a
+request failed, was not received, or was harmless. A timeout remains `UNKNOWN`.
 
-The seam is experimental and intentionally smaller than a cross-product protocol. It accepts no
-receipt bytes, trust decision, operation authority, credentials, private identifiers, or live
-transport. `recorded` identifies provenance, not infrastructure truth, receipt verification, or a
+The seam is experimental and intentionally smaller than a cross-product protocol. It accepts no raw
+product record, trust decision, operation authority, credentials, private identifiers, or live
+transport. `recorded` identifies provenance, not infrastructure truth, source verification, or a
 production claim.

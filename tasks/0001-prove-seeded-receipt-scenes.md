@@ -13,7 +13,7 @@
 Grafik generates complete renderer-neutral receipt and diagram scene plans in Rust from bounded
 semantic data, explicit seeds, and hard budgets. A small WASM interface lets a browser render,
 measure, and replay those plans. The standalone Grafik lab provides the development and review loop;
-kapsel.cloud is not a build input and is not modified by this work.
+no consumer repository is a build input or modified by this work.
 
 ## Acceptance
 
@@ -49,11 +49,11 @@ kapsel.cloud is not a build input and is not modified by this work.
 - `node /tmp/grafik-wasm-smoke.mjs` (2026-07-19): generated a scene and measured load trace through
   the built WASM interface.
 - `http://127.0.0.1:4174/lab.html?seed=424242&recipe=balanced`: standalone six-scene grid is served
-  from Grafik while kapsel.cloud continues on its separate local port.
+  entirely from the Grafik checkout.
 
 ## Residual risk
 
 The renderer-neutral scene-plan model was selected explicitly; Rust-authored markup was rejected.
 Real-browser accessibility-tree behavior, 320-pixel reflow, visual quality across the pinned seed
-corpus, and long-session timer cleanup still require manual proof. The pre-existing concurrent
-`web/main.js` modification remains unresolved and was not edited as part of this task.
+corpus and long-session timer cleanup still require manual proof. The recorded tracer's generated
+WASM imports now have a direct adapter regression test.

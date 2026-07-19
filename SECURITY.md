@@ -12,7 +12,7 @@ remediation SLA is promised during bootstrap.
 ## Security boundary
 
 The browser tracer is simulated and performs no infrastructure work. Grafik must never embed
-Kubernetes credentials, Kapsel owner signing keys, gateway authority, or other operational secrets
+infrastructure credentials, product signing keys, remote authority, or other operational secrets
 in browser assets. The Rust/WASM package manipulates simulation data only and does not access the
 DOM, network, filesystem, or environment.
 

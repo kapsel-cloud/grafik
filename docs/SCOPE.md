@@ -9,15 +9,15 @@
 ## Purpose
 
 Grafik is an open-source explanation system for seeded living diagrams and executable product
-explanations. It is a visual practice and simulation contract, not a generic animation library or
-another Kapsel product.
+explanations. It is a visual practice and simulation contract, not a generic animation library or a
+product-specific application.
 
 A living diagram uses semantic events to evolve one spatial field around explanatory panels.
 Published runs are seeded and replayable. Simulated and intentionally published recorded results
 enter through one bounded semantic vocabulary before spatial evolution; neither source grants the
 browser infrastructure authority. Product-specific meaning and data mapping, brand styling, browser
-geometry, and accessibility remain in downstream adapters such as kapsel.cloud; Grafik owns the
-renderer-neutral scene tree generated from that bounded display content.
+geometry, and accessibility remain in consumer adapters; Grafik owns the renderer-neutral scene tree
+generated from bounded display content.
 
 ## First tracer
 
@@ -36,7 +36,7 @@ The first tracer proves one end-to-end path:
 
 The result tracer accepts one simulated or recorded final disposition and preserves it through the
 public renderer-neutral trace. This is not a stable cross-product protocol, receipt parser, live
-Kapsel client, or claim that a recorded result proves infrastructure truth.
+product client, or claim that a recorded result proves infrastructure truth.
 
 ## Receipt-scene tracer
 
@@ -47,8 +47,8 @@ script. The browser renders those roles, measures actual node rectangles and por
 geometry for a complete timed trace.
 
 “Rust-owned view” means a typed scene plan, not Rust-authored HTML, SVG, CSS, or DOM mutation. Receipt
-content remains caller-provided data; Grafik does not parse Kapsel receipts or define product result
-meaning. The standalone Grafik lab is the development and review adapter. A downstream product should
+content remains caller-provided data; Grafik does not parse product records or define product result
+meaning. The standalone Grafik lab is the development and review adapter. A consumer product should
 need only the generated WASM, two JSON calls, and its concrete renderer.
 
 ## Non-goals
@@ -58,8 +58,8 @@ need only the generated WASM, two JSON calls, and its concrete renderer.
 - Full-screen effects or effects that move readable content
 - DOM access from Rust/WASM
 - Remote gateway integration, hosted service behavior, or infrastructure work
-- Browser credentials, Kubernetes authority, or Kapsel owner signing keys
-- A Kapsel receipt schema, brand renderer, or source-level dependency on kapsel.cloud
+- Browser credentials, infrastructure authority, or product signing keys
+- A product-specific receipt schema, brand renderer, or source-level dependency on a consumer
 - Stable public compatibility or production-readiness claims
 
 ## Exit condition

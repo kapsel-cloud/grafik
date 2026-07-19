@@ -71,9 +71,9 @@ cargo make lab
 ```
 
 Open `http://127.0.0.1:4174/lab.html`. The command builds the current WASM bindings and serves only
-Grafik's `web/` directory. Port 4174 is deliberately distinct from kapsel.cloud's local port so both
-can run in parallel. The lab uses simulated inputs and does not require, read, or modify a
-kapsel.cloud checkout. Use its seed and recipe URL parameters for exact local replay.
+Grafik's `web/` directory. Port 4174 leaves common application-preview ports free so a consumer can
+run in parallel. The lab uses simulated inputs and does not require, read, or modify another
+checkout. Use its seed and recipe URL parameters for exact local replay.
 
 Do not point this command at another repository, add a cross-repository symlink, or automate copying
 into a sibling checkout. A downstream integration should select a Grafik revision or attributable
@@ -81,7 +81,7 @@ artifact explicitly and make its own reviewed repository change.
 
 ## Browser tracer
 
-Build bindings before serving the recorded-result tracer:
+Build bindings before serving the simulated outcome tracer:
 
 ```sh
 cargo make wasm

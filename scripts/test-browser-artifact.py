@@ -12,7 +12,6 @@ REQUIRED_BROWSER_FILES = {
     "main.js",
     "style.css",
     "svg-adapter.js",
-    "fixtures/kapsel-recorded-success.json",
     "pkg/grafik.js",
     "pkg/grafik_bg.wasm",
 }

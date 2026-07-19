@@ -35,10 +35,10 @@ const controlledSeed = () => {
 
 const showResult = () => {
   resultText.textContent = selectedResult.final_disposition;
-  const recorded = selectedResult.result_source === "recorded";
-  resultSource.textContent = recorded
-    ? "Kapsel v0.1.0 evaluator recording"
-    : "simulated preview · no infrastructure work";
+  resultSource.textContent =
+    selectedResult.result_source === "recorded"
+      ? "recorded bounded input"
+      : "simulated input · no external operation";
   for (const button of outcomeButtons) {
     button.setAttribute(
       "aria-pressed",
@@ -89,17 +89,13 @@ const run = () => {
   }
 };
 
-const loadRecordedResult = async () => {
-  const response = await fetch("./fixtures/kapsel-recorded-success.json");
-  if (!response.ok) throw new Error(`recorded result returned HTTP ${response.status}`);
-  const fixture = await response.json();
-  return fixture.result;
-};
-
 const start = async () => {
   try {
-    const [, , result] = await Promise.all([init(), document.fonts.ready, loadRecordedResult()]);
-    selectedResult = result;
+    await Promise.all([init(), document.fonts.ready]);
+    selectedResult = {
+      result_source: "simulated",
+      final_disposition: "SUCCEEDED",
+    };
     controls.hidden = false;
     run();
   } catch (error) {

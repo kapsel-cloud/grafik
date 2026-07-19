@@ -14,7 +14,6 @@ test("standalone lab uses only local Grafik assets", () => {
   for (const source of [script, adapter]) {
     assert.doesNotMatch(source, /fetch\s*\(/u);
     assert.doesNotMatch(source, /Math\.random/u);
-    assert.doesNotMatch(source, /kapsel\.cloud/u);
   }
 });
 

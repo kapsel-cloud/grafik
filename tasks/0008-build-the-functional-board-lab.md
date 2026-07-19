@@ -53,7 +53,7 @@ never an independent persistence model.
   native range inputs are preferred over custom slider semantics.
 - Variation and randomize actions visibly identify changed and excluded parameters.
 - Undo/redo rebuilds state from commands and survives a complete JSON round trip.
-- No editor path uses ambient randomness, wall time, network, or kapsel.cloud files.
+- No editor path uses ambient randomness, wall time, network, or consumer-repository files.
 - At 320 CSS px the board becomes one column in canonical logical order with no horizontal overflow.
 - `cargo make check` passes and the manual browser evidence is recorded.
 

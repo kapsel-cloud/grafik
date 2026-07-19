@@ -2,10 +2,9 @@
 name = "grafik"
 version = "0.1.0-alpha.1"
 edition = "2021"
-authors = ["Kapsel Contributors"]
+authors = ["Grafik Contributors"]
 license = "Apache-2.0"
 repository = "https://github.com/kapsel-cloud/grafik"
-homepage = "https://github.com/kapsel-cloud/grafik"
 documentation = "https://docs.rs/grafik"
 description = "Living diagrams for executable product explanations"
 readme = "README.md"
@@ -22,7 +21,6 @@ include = [
   "/web/*.css",
   "/web/*.js",
   "/web/package.json",
-  "/web/fixtures/**",
   "/web/tests/**",
   "/web/pkg/.gitkeep",
   "/Cargo.toml",

@@ -35,21 +35,17 @@ stage's local coordinate space. It selects the bottom-center hero port and top-c
 and sends both rectangles, ports, and the outcome-text region to WASM. It reruns the tracer after a
 debounced resize. Geometry measurement is browser work; Rust never queries or mutates the DOM.
 
-## Recorded result adapter
+## Simulated result adapter
 
-The browser loads `fixtures/kapsel-recorded-success.json`, takes only its `result_source` and
-`final_disposition`, and passes them with measured geometry into WASM. The fixture is a sanitized
-record associated with the published Kapsel `v0.1.0` evaluator. It is not a receipt, trust decision,
-live operation, or stable cross-product format.
+The standalone preview constructs one explicit simulated `SUCCEEDED` result and passes it with
+measured geometry into WASM. It loads no product record, performs no live operation, and defines no
+stable cross-product format. Selecting another disposition keeps the same seed and changes only the
+bounded simulated input.
 
-The fixture identifies a recorded run, simulated presentation, and non-production status. Its only
-provenance is the permanent GitHub evaluator guide for Kapsel `v0.1.0`. It contains no credentials,
-grants, seeds, kubeconfig, journal, receipt bytes or digest, trust material, private paths, cluster
-identities, operation identifiers, source revisions, commands, or timing.
-
-The standalone preview starts with this recorded `SUCCEEDED` result. Selecting `FAILED` or `UNKNOWN`
-creates an explicitly simulated result with the same seed and performs no infrastructure work.
-Controls update readable outcome and provenance text before running the decorative profile.
+Consumer adapters may supply intentionally published recorded results through the same semantic
+interface, but product records, provenance formats, transport, and classification remain outside the
+standalone Grafik repository. Controls update readable outcome and source text before running the
+decorative profile.
 
 ## Browser outcome adapter
 

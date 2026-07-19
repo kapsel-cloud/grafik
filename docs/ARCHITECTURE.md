@@ -50,8 +50,8 @@ one concrete adapter.
 
 ## Dependency direction
 
-- Domain types and simulation know nothing about WASM, JSON, SVG, CSS, DOM, clocks, Kapsel receipt
-  bytes, or Kapsel transport. Callers provide bounded display content and adapters translate product
+- Domain types and simulation know nothing about WASM, JSON, SVG, CSS, DOM, clocks, product record
+  bytes, or live transport. Callers provide bounded display content and adapters translate product
   results into Grafik's semantic vocabulary.
 - The WASM adapter depends inward on the simulation interface.
 - Browser adapters depend on the generated WASM interface, scene schema, and spatial event schema.
@@ -63,15 +63,15 @@ one concrete adapter.
 ## Repository boundary
 
 Grafik's development loop is contained in this repository. Native tests, WASM generation, and the
-standalone lab must not read from, write to, serve files from, or require a checkout of kapsel.cloud.
-The lab uses simulated bounded inputs and generated files under Grafik's own `web/pkg/` directory.
+standalone lab must not read from, write to, serve files from, or require a consumer checkout. The
+lab uses simulated bounded inputs and generated files under Grafik's own `web/pkg/` directory.
 
 A downstream product may consume an explicitly selected Grafik revision or attributable artifact,
 but it owns the integration change in its own repository. Do not use cross-repository symlinks,
 relative path dependencies, or scripts that copy into a sibling checkout: those make parallel work
-silently alter another worktree. Kapsel product-data mapping, DOM/SVG/CSS, brand tokens,
-accessibility, and responsive geometry remain kapsel.cloud adapter concerns; Grafik owns only the
-renderer-neutral tree and layout roles it receives and generates.
+silently alter another worktree. Product-data mapping, DOM/SVG/CSS, brand tokens, accessibility, and
+responsive geometry remain consumer-adapter concerns; Grafik owns only the renderer-neutral tree and
+layout roles it receives and generates.
 
 ## Package discipline
 

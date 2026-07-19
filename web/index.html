@@ -6,9 +6,9 @@
     <meta name="theme-color" content="#e5e2d9" />
     <meta
       name="description"
-      content="Grafik by Kapsel — living diagrams for executable product explanations."
+      content="Grafik — living diagrams for executable product explanations."
     />
-    <title>Grafik by Kapsel</title>
+    <title>Grafik</title>
     <link rel="stylesheet" href="./style.css" />
     <script type="module" src="./main.js"></script>
   </head>
@@ -19,7 +19,7 @@
       </svg>
 
       <header class="panel hero" data-panel="hero">
-        <p class="kicker">Grafik by Kapsel · recorded result tracer</p>
+        <p class="kicker">Grafik · simulated result tracer</p>
         <h1>Living diagrams for executable product explanations.</h1>
         <p>
           A seeded Rust simulation evolves one spatial field. The browser measures panels and
@@ -29,8 +29,8 @@
 
       <section class="panel receipt" data-panel="receipt" aria-labelledby="receipt-title">
         <div>
-          <p class="kicker">Recorded run · simulated presentation · not production</p>
-          <h2 id="receipt-title">One recorded result. One replayable explanation.</h2>
+          <p class="kicker">Simulated input · deterministic presentation · experimental</p>
+          <h2 id="receipt-title">One bounded result. One replayable explanation.</h2>
         </div>
         <dl>
           <div>
@@ -40,7 +40,7 @@
               <span class="outcome-text" data-result-text>SUCCEEDED</span>
             </dd>
           </div>
-          <div><dt>source</dt><dd data-result-source>Kapsel v0.1.0 evaluator recording</dd></div>
+          <div><dt>source</dt><dd data-result-source>simulated input · no external operation</dd></div>
           <div><dt>rendering</dt><dd>seeded Rust/WASM · browser adapter</dd></div>
         </dl>
         <div class="profile-controls" data-outcome-controls hidden>
@@ -51,11 +51,11 @@
           </div>
           <label class="seed-control">seed <input data-seed type="number" min="1" value="424242" /></label>
         </div>
-        <p class="status" data-status aria-live="polite">Preparing recorded result…</p>
+        <p class="status" data-status aria-live="polite">Preparing simulated result…</p>
       </section>
 
       <aside class="limits" aria-label="Current limits">
-        Recorded, not live · no gateway connection · no browser authority · no credentials
+        Simulated, not live · no external connection · no browser authority · no credentials
       </aside>
     </main>
     <noscript>Grafik's panels remain readable, but this tracer needs JavaScript to render WASM.</noscript>
