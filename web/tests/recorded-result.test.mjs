@@ -3,8 +3,17 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const fixtureUrl = new URL("../fixtures/kapsel-recorded-success.json", import.meta.url);
+const mainUrl = new URL("../main.js", import.meta.url);
 
 const loadFixture = async () => JSON.parse(await readFile(fixtureUrl, "utf8"));
+
+test("recorded tracer imports the generated WASM interface it calls", async () => {
+  const source = await readFile(mainUrl, "utf8");
+
+  assert.match(source, /import init, \{ grafik_trace \} from "\.\/pkg\/grafik\.js";/u);
+  assert.match(source, /await Promise\.all\(\[init\(\)/u);
+  assert.match(source, /grafik_trace\(JSON\.stringify\(input\)\)/u);
+});
 
 test("recorded fixture exposes one bounded publishable result", async () => {
   const fixture = await loadFixture();

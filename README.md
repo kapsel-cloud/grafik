@@ -12,10 +12,6 @@ Pre-release tracer only. The Rust interfaces generate deterministic renderer-neu
 complete timed traces; the included browser adapters are narrow proofs, not stable interfaces or a
 production-ready animation library. Breaking changes are expected between alpha releases.
 
-Grafik does not connect to Kubernetes or a Kapsel gateway, does not hold credentials, and does not
-manipulate the DOM from WASM. It preserves one simulated or recorded final disposition without
-parsing Kapsel receipts or claiming infrastructure truth.
-
 ## Use the alpha
 
 Pin the exact pre-release while the interface is experimental:
@@ -38,15 +34,8 @@ cargo make check
 cargo make lab
 ```
 
-Open `http://127.0.0.1:4174/lab.html`. The standalone lab builds and serves files from this Grafik
-checkout only. It uses simulated inputs, exposes the complete trace, and neither requires nor changes
-a kapsel.cloud checkout, so both repositories can be developed in parallel.
-
-The recorded-result proof remains available with `cargo make wasm && cargo make serve` at
-`http://127.0.0.1:4174`. It loads one sanitized recorded KAP-0038 result, measures the hero and
-receipt panels, asks WASM for a seeded trace, and renders it through SVG. This remains a simulated,
-non-production presentation. Reduced-motion users receive the final readable state without animated
-traversal.
+Open `http://127.0.0.1:4174/lab.html`. The standalone lab builds and serves files from this checkout,
+uses simulated inputs, and exposes complete scene and trace JSON without requiring a live service.
 
 ## Read next
 
@@ -55,6 +44,7 @@ traversal.
 - Simulation seam: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
 - Spatial vocabulary and limits: [`docs/PATTERNS.md`](docs/PATTERNS.md)
 - Determinism and trace contract: [`docs/SIMULATION.md`](docs/SIMULATION.md)
+- Contribution workflow: [`CONTRIBUTING.md`](CONTRIBUTING.md)
 
 ## Package identity
 

@@ -32,6 +32,7 @@ include = [
   "/rustfmt.toml",
   "/README.md",
   "/CHANGELOG.md",
+  "/CONTRIBUTING.md",
   "/LICENSE",
   "/SECURITY.md",
 ]
