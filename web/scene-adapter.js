@@ -177,7 +177,7 @@ const endpoint = (rect, origin, toward, overlap = 3) => {
   };
 };
 
-export const measuredEdgeEndpoints = (source, target, origin) => {
+export const measuredEdgeEndpoints = (source, target, origin, overlap = 3) => {
   const sourceCenter = {
     x: source.left - origin.left + source.width / 2,
     y: source.top - origin.top + source.height / 2,
@@ -187,17 +187,35 @@ export const measuredEdgeEndpoints = (source, target, origin) => {
     y: target.top - origin.top + target.height / 2,
   };
   return {
-    from: endpoint(source, origin, targetCenter),
-    to: endpoint(target, origin, sourceCenter),
+    from: endpoint(source, origin, targetCenter, overlap),
+    to: endpoint(target, origin, sourceCenter, overlap),
   };
 };
 
-export const drawDiagram = (view) => {
+const arrowMarker = (id) => {
+  const defs = document.createElementNS(SVG_NAMESPACE, "defs");
+  const marker = document.createElementNS(SVG_NAMESPACE, "marker");
+  marker.id = id;
+  marker.setAttribute("viewBox", "0 0 10 10");
+  marker.setAttribute("refX", "9");
+  marker.setAttribute("refY", "5");
+  marker.setAttribute("markerWidth", "6");
+  marker.setAttribute("markerHeight", "6");
+  marker.setAttribute("orient", "auto-start-reverse");
+  const path = document.createElementNS(SVG_NAMESPACE, "path");
+  path.setAttribute("d", "M 0 0 L 10 5 L 0 10 z");
+  marker.append(path);
+  defs.append(marker);
+  return defs;
+};
+
+export const drawDiagram = (view, disconnectedEdge = null) => {
   if (!view.diagramView) return;
   const { stage, svg } = view.diagramView;
   const origin = stage.getBoundingClientRect();
+  const markerId = `scene-arrow-${view.plan.seed}`;
   svg.setAttribute("viewBox", `0 0 ${origin.width} ${origin.height}`);
-  svg.replaceChildren();
+  svg.replaceChildren(arrowMarker(markerId));
   for (const edge of view.plan.diagram.edges) {
     const source = view.nodes.get(edge.from)?.getBoundingClientRect();
     const target = view.nodes.get(edge.to)?.getBoundingClientRect();
@@ -205,10 +223,16 @@ export const drawDiagram = (view) => {
     const { from, to } = measuredEdgeEndpoints(source, target, origin);
     const line = document.createElementNS(SVG_NAMESPACE, "line");
     line.dataset.diagramEdge = edge.id;
+    line.setAttribute("pathLength", "1");
     line.setAttribute("x1", String(from.x));
     line.setAttribute("y1", String(from.y));
     line.setAttribute("x2", String(to.x));
     line.setAttribute("y2", String(to.y));
+    if (edge.id === disconnectedEdge) {
+      line.classList.add("is-disconnected");
+    } else {
+      line.setAttribute("marker-end", `url(#${markerId})`);
+    }
     svg.append(line);
   }
 };
@@ -232,7 +256,8 @@ export const renderScene = (plan, mount, { onAction = () => {} } = {}) => {
   overlay.setAttribute("aria-hidden", "true");
   frame.append(overlay);
   mount.replaceChildren(frame);
-  const view = { plan, root: frame, nodes, diagramView, overlay };
+  const resultToken = frame.querySelector(".scene-result-token");
+  const view = { plan, root: frame, nodes, diagramView, overlay, resultToken };
   drawDiagram(view);
   return view;
 };
@@ -246,15 +271,30 @@ const localRect = (rect, origin) => ({
 
 export const measureScene = (view) => {
   const origin = view.root.getBoundingClientRect();
-  return [...view.nodes.entries()].map(([id, node]) => {
-    const rect = localRect(node.getBoundingClientRect(), origin);
-    return {
-      id,
-      rect,
-      incoming: { x: rect.x, y: rect.y + rect.height / 2 },
-      outgoing: { x: rect.x + rect.width, y: rect.y + rect.height / 2 },
-    };
-  });
+  const measurements = new Map(
+    [...view.nodes.entries()].map(([id, node]) => {
+      const bounds = node.getBoundingClientRect();
+      const rect = localRect(bounds, origin);
+      return [
+        id,
+        {
+          id,
+          rect,
+          incoming: { x: rect.x, y: rect.y + rect.height / 2 },
+          outgoing: { x: rect.x + rect.width, y: rect.y + rect.height / 2 },
+        },
+      ];
+    }),
+  );
+  for (const edge of view.plan.diagram.edges) {
+    const source = view.nodes.get(edge.from)?.getBoundingClientRect();
+    const target = view.nodes.get(edge.to)?.getBoundingClientRect();
+    if (!source || !target) continue;
+    const ports = measuredEdgeEndpoints(source, target, origin, 0);
+    measurements.get(edge.from).outgoing = ports.from;
+    measurements.get(edge.to).incoming = ports.to;
+  }
+  return [...measurements.values()];
 };
 
 const effectNode = (view, id) => view.nodes.get(id)?.querySelector(".scene-effect-backing");
@@ -292,6 +332,30 @@ const traversal = (view, event, packet) => {
   return line;
 };
 
+const approval = (view, event) => {
+  const target = view.nodes.get(event.target_id);
+  if (!target) return;
+  const mark = element("span", "scene-success-reinforcement", "👍");
+  mark.setAttribute("aria-hidden", "true");
+  target.append(mark);
+};
+
+const disconnectSparks = (view, event) => {
+  const group = document.createElementNS(SVG_NAMESPACE, "g");
+  group.classList.add("scene-disconnect-sparks");
+  group.style.setProperty("--effect-ms", `${event.duration_ms}ms`);
+  for (let index = 0; index < event.sparks; index += 1) {
+    const spark = document.createElementNS(SVG_NAMESPACE, "circle");
+    spark.setAttribute("cx", String(event.point.x));
+    spark.setAttribute("cy", String(event.point.y));
+    spark.setAttribute("r", "2.5");
+    spark.style.setProperty("--spark-index", String(index));
+    group.append(spark);
+  }
+  view.overlay.append(group);
+  return group;
+};
+
 export const renderSceneTrace = (
   trace,
   view,
@@ -303,11 +367,16 @@ export const renderSceneTrace = (
   } = {},
 ) => {
   view.overlay.replaceChildren();
+  for (const mark of view.root.querySelectorAll(".scene-success-reinforcement")) mark.remove();
   const bounds = view.root.getBoundingClientRect();
   view.overlay.setAttribute("viewBox", `0 0 ${bounds.width} ${bounds.height}`);
+  const success = trace.events.find((event) => event.kind === "success_reinforced");
   if (reducedMotion) {
+    if (success) approval(view, success);
     announce("Scene interaction applied. Motion reduced.");
-    return () => {};
+    return () => {
+      for (const mark of view.root.querySelectorAll(".scene-success-reinforcement")) mark.remove();
+    };
   }
   const jobs = [];
   for (const event of trace.events) {
@@ -347,6 +416,15 @@ export const renderSceneTrace = (
           jobs.push(schedule(() => mark.remove(), event.duration_ms));
         }, event.at_ms),
       );
+    } else if (event.kind === "flow_disconnected") {
+      jobs.push(
+        schedule(() => {
+          const sparks = disconnectSparks(view, event);
+          jobs.push(schedule(() => sparks.remove(), event.duration_ms));
+        }, event.at_ms),
+      );
+    } else if (event.kind === "success_reinforced") {
+      jobs.push(schedule(() => approval(view, event), event.at_ms));
     } else if (event.kind === "interaction_finished") {
       jobs.push(schedule(() => announce("Scene interaction complete."), event.at_ms));
     }
@@ -354,6 +432,7 @@ export const renderSceneTrace = (
   return () => {
     for (const job of jobs) cancel(job);
     view.overlay.replaceChildren();
+    for (const mark of view.root.querySelectorAll(".scene-success-reinforcement")) mark.remove();
     for (const node of view.nodes.values()) {
       const layer = node.querySelector(".scene-effect-backing");
       layer?.classList.remove("is-pulsing", "is-glitching", "is-inverting", "is-scanning");

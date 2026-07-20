@@ -27,6 +27,8 @@
   `interactive`; never a literal color, font, or selector.
 - **Effect target:** a stable scene node or diagram edge that may receive decorative events.
 - **Interaction script:** deterministic events associated with scene load or one stable action ID.
+- **Flow state:** one selected final disposition plus at most one disconnected declared edge; it
+  changes trace selection without changing generated topology.
 - **Phase:** one controlled interval in an interaction script. Phases are ordered and may overlap only
   when their combined live effects remain within budget.
 
@@ -67,60 +69,43 @@ Invalid input or a budget that cannot contain the requested content fails before
 advances. Rare choices consume the same hard budgets as normal choices and cannot increase the
 limits.
 
-## Tracer connector
+## Animated flow profile
 
-The browser selects the hero's bottom edge port and receipt's top edge port. The simulation requires
-non-overlapping panels with vertical clearance. It creates an orthogonal route in that clearance:
-one outward segment, a seeded lateral choice when useful, one cross-gap segment, and one inward
-segment. Zero-length segments are omitted.
+The curated `animated_flow` recipe uses the caller's bounded labels to generate one linear directed
+topology in label order. The first fixture is `grant -> journal -> provider seam -> observe ->
+receipt`. Its plan retains every declared edge while flow state selects `SUCCEEDED`, `FAILED`, or
+`UNKNOWN` and may mark one edge disconnected.
 
-Panel interiors are closed exclusion zones. A segment may touch its selected port but must not enter
-either interior. Growth proceeds from the hero; retraction removes segments in reverse order from
-the receipt leaf.
+Replay traverses every connected edge once in declared order. Each traversal lasts 240–480 ms and
+uses browser-measured source and target ports. A selected disconnect suppresses that edge and every
+later traversal, then emits one break-local spark cue at the selected edge midpoint. The cue contains
+1–4 particles, lasts 120–240 ms, and does not imply that the target or terminal completed.
 
-Tracer budgets:
+A fully connected flow may apply exactly one terminal cue after traversal:
+
+- `SUCCEEDED` may add one static, decorative approval mark that the browser projects as a thumbs-up;
+- `FAILED` emits one 140–260 ms glitch on the terminal's decorative backing; and
+- `UNKNOWN` emits no success or failure cue.
+
+The explicit result label remains readable for every state. When disconnected, the selected result
+label remains visible as control state, but all terminal outcome cues are suppressed. Traversal,
+sparks, approval marks, and glitches are decorative, `aria-hidden`, pointer-inert, and cannot move or
+replace readable labels.
+
+Animated-flow budgets:
 
 | Budget | Limit |
 | --- | --- |
-| Connector density | At most 5 live segments |
-| Segment growth | 120–260 ms per segment |
-| Segment retraction | 90–180 ms per segment |
-| Route clearance | At least 8 CSS px from panel interiors in the gap |
-| Direction set | Orthogonal only |
-| Chaos | One seeded lateral route choice; no branching |
-| Lifetime | Every grown segment is retracted in the same trace |
-
-## Succeeded progress profile
-
-`SUCCEEDED` uses the tracer connector as weighted progress. Each grown segment receives one seeded
-weight from 1 through 3; weight 2 is most common, weight 1 is next, and weight 3 is rare. After growth,
-one seeded pulse traverses the connector before leaf-first retraction. Pulse duration is 360–720 ms
-and intensity is 1–3. Growth keeps the 120–260 ms segment budget, retraction keeps 90–180 ms per
-segment, density stays at five live segments or fewer, and direction remains orthogonal with no
-branching.
-
-## Failed local-glitch profile
-
-`FAILED` emits one seeded glitch behind the outcome text. Duration is 140–260 ms, horizontal and
-vertical displacement are each at most 3 CSS px, and strip count is 1–3. Only the decorative backing
-layer moves; the readable text, panel, and surrounding layout remain fixed. The browser maps the
-event to the concrete outcome element and states `FAILED` in HTML independently.
-
-## Unknown question-mark profile
-
-`UNKNOWN` emits decorative `?` marks behind the outcome region for a two-second burst. The seeded
-rate is 1–3 marks per second, normal density is at most three live marks, and lifetime is 450–900 ms.
-A rare one-in-32 seeded choice may add one cluster of up to two marks while preserving a hard maximum
-of five live marks. Coordinates are bounded to the outcome region, and each mark carries one of
-three semantic palette roles rather than a literal color. Marks never enter reading order or carry
-meaning unavailable in the `UNKNOWN` text.
-
-Other dispositions do not reuse these receiver cues. `NOT_ATTEMPTED` remains a pre-attempt
-disposition and receives no animated receiver profile.
+| Flow nodes / edges | At most 16 / 15; first fixture uses 5 / 4 |
+| Edge traversal | 240–480 ms per connected edge |
+| Disconnected edges | At most one declared edge |
+| Break sparks | One cue, 1–4 particles, 120–240 ms |
+| Terminal cues | At most one, only for a fully connected flow |
+| Complete flow replay | At most 8,000 ms |
 
 ## Future bounded profile
 
 Ambient drift remains independent sparse growth with coordinate changes every 7–11 seconds.
 
 No profile may move labels, displace the full screen, obscure panel text, or make meaning depend on
-motion or color. Reduced motion suppresses every pulse, glitch, and question mark.
+motion or color. Reduced motion suppresses traversal, sparks, pulses, and glitches.

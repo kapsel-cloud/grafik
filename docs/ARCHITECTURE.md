@@ -16,7 +16,7 @@ bounded content + recipe + seed + budgets
                                          |
                          browser renders and measures stable node IDs
                                          |
-scene plan + measured geometry + interaction
+scene plan + measured geometry + parameterized interaction
                 -> simulate_scene -> complete renderer-neutral timed trace
                                          |
                               browser adapter renders trace
@@ -29,10 +29,11 @@ Callers receive one complete serializable plan and do not configure those intern
 individually.
 
 `grafik::simulate_scene` is the measured-effects interface. It accepts one generated plan,
-browser-measured rectangles and ports keyed by stable node ID, and one declared interaction. Behind
-it live geometry validation, route construction, phase timing, local-effect placement, and complete
-trace generation. The current `grafik::simulate` result tracer remains while this vertical tracer is
-proved; it must be absorbed rather than becoming a parallel long-term implementation.
+browser-measured rectangles and ports keyed by stable node ID and one declared interaction. An
+animated-flow interaction carries result provenance, final disposition, and at most one disconnected
+edge. Behind the interface live geometry validation, route construction, phase timing, local-effect
+placement, and complete trace generation. Outcome and disconnect behavior enter through this same
+interface rather than a parallel result tracer.
 
 The `wasm` Rust module is a shallow serialization adapter compiled only for `wasm32`. It exposes one
 JSON call per Rust interface, translates into the same inputs used by native tests, and returns JSON.
@@ -40,13 +41,13 @@ It must not import browser DOM types or retain hidden mutable scene state.
 
 The browser owns two concrete concerns without introducing a generic rendering interface:
 
-- `web/main.js` measures DOM rectangles, selects edge ports, and calls generated WASM bindings.
-- `web/svg-adapter.js` projects spatial events into SVG line segments and schedules visual traversal.
+- `web/lab.js` selects flow state and calls generated WASM scene bindings with measured geometry.
+- `web/scene-adapter.js` renders semantic HTML and projects directed SVG topology and timed events.
 
 A second rendering implementation would make a renderer seam real. Until then, the lab's HTML/SVG
 adapter stays concrete. `web/lab.html` is the independent development host for these public
-interfaces; it is not a second product showcase. Its grid may render many scene plans, but all use
-one concrete adapter.
+interfaces; it is not a second product showcase. The animated tracer and receipt scenes use the same
+concrete adapter.
 
 ## Dependency direction
 

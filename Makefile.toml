@@ -83,7 +83,7 @@ args = ["scripts/test-browser-artifact.py"]
 [tasks.test-web]
 description = "Run dependency-free browser-adapter tests"
 command = "node"
-args = ["--test", "web/tests/svg-adapter.test.mjs"]
+args = ["--test", "web/tests/lab.test.mjs", "web/tests/scene-adapter.test.mjs"]
 
 [tasks.serve]
 description = "Serve the browser tracer on http://127.0.0.1:4174"

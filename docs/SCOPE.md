@@ -21,16 +21,18 @@ generated from bounded display content.
 
 ## First tracer
 
-The first tracer proves one end-to-end path:
+The first maintained tracer proves one end-to-end path:
 
 1. One Rust package owns the product and workspace root.
-2. A browser reports two panel rectangles and selected edge ports.
-3. A seeded simulation evolves an orthogonal sparse connector from hero to receipt.
-4. The connector grows segment by segment and retracts from its leaf.
-5. WASM returns renderer-neutral spatial events.
-6. A shallow SVG adapter renders those events without crossing panel interiors.
-7. Replaying the same input and seed yields the same event trace.
-8. Reduced motion applies the final readable state without animated traversal.
+2. Rust generates the linear `grant -> journal -> provider seam -> observe -> receipt` topology.
+3. A browser reports measured node rectangles and selected edge ports.
+4. A seeded simulation traverses each directed edge in declared order.
+5. One selected disconnect stops traversal and emits a bounded break-local cue.
+6. Explicit `SUCCEEDED`, `FAILED`, and `UNKNOWN` text remains independent of decoration.
+7. WASM returns renderer-neutral events through the same scene interface used by receipt scenes.
+8. A shallow SVG adapter renders those events without crossing node interiors.
+9. Replaying the same plan, state, seed, and geometry yields the same complete trace.
+10. Reduced motion applies the final readable state without animated traversal.
 
 ## Result seam
 

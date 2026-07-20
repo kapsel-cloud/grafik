@@ -1,7 +1,7 @@
 use core::fmt;
 use serde::{Deserialize, Serialize};
 
-use crate::{FinalDisposition, Point, Rect};
+use crate::{FinalDisposition, Point, Rect, ResultSource};
 
 const SCENE_FORMAT_VERSION: u16 = 1;
 const ABSOLUTE_MAX_NODES: u8 = 48;
@@ -29,6 +29,8 @@ pub enum SceneRecipe {
     Balanced,
     /// The highest density allowed by the supplied hard budgets.
     Vivid,
+    /// One ordered, directed animated flow with explicit outcome and disconnect state.
+    AnimatedFlow,
 }
 
 /// Hard caller limits that may only narrow Grafik's absolute budgets.
@@ -425,12 +427,56 @@ pub struct EffectPlan {
 
 /// Trigger selecting one deterministic interaction script.
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-#[serde(tag = "kind", content = "action_id", rename_all = "snake_case")]
+#[serde(tag = "kind", rename_all = "snake_case")]
 pub enum InteractionTrigger {
     /// Scene-load script.
     Load,
     /// Script for one generated native action.
-    Action(String),
+    Action {
+        /// Stable generated action identifier.
+        action_id: String,
+    },
+    /// Parameterized replay of one generated animated flow.
+    Flow {
+        /// Whether the selected result is simulated or intentionally recorded.
+        result_source: ResultSource,
+        /// Explicit final disposition preserved without reinterpretation.
+        final_disposition: FinalDisposition,
+        /// At most one declared edge at which traversal stops.
+        disconnected_edge: Option<String>,
+    },
+}
+
+/// One ordered measured-edge traversal phase in an animated flow.
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+pub struct FlowEdgePhase {
+    /// Stable declared diagram-edge identifier.
+    pub edge_id: String,
+    /// Controlled traversal start time in milliseconds.
+    pub at_ms: u32,
+    /// Controlled traversal duration in milliseconds.
+    pub duration_ms: u16,
+}
+
+/// Complete deterministic timing and terminal plan for one animated flow.
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+pub struct FlowPlan {
+    /// Every declared edge exactly once in topology order.
+    pub edge_phases: Vec<FlowEdgePhase>,
+    /// Stable terminal diagram-node identifier.
+    pub terminal_id: String,
+    /// Time at which a connected terminal cue begins.
+    pub terminal_at_ms: u32,
+    /// Bounded failure-backing duration.
+    pub failure_duration_ms: u16,
+    /// Bounded horizontal failure-backing displacement.
+    pub failure_offset_x: i8,
+    /// Bounded vertical failure-backing displacement.
+    pub failure_offset_y: i8,
+    /// Bounded duration of one break-local spark cue.
+    pub disconnect_duration_ms: u16,
+    /// Bounded number of break-local sparks.
+    pub disconnect_sparks: u8,
 }
 
 /// One trigger and the generated effect plans it runs.
@@ -457,6 +503,8 @@ pub struct ScenePlan {
     pub root: SceneNode,
     /// Generated diagram topology.
     pub diagram: DiagramPlan,
+    /// Complete animated-flow plan, present only for the animated-flow recipe.
+    pub flow: Option<FlowPlan>,
     /// Generated decorative effect plans.
     pub effects: Vec<EffectPlan>,
     /// Generated load and action scripts.
@@ -592,6 +640,28 @@ pub enum SceneEvent {
         /// Traversal duration in milliseconds.
         duration_ms: u16,
     },
+    /// Marks one selected edge break and its bounded local spark cue.
+    FlowDisconnected {
+        /// Stable selected diagram-edge ID.
+        edge_id: String,
+        /// Measured midpoint of the disconnected edge.
+        point: Point,
+        /// Controlled simulation time in milliseconds.
+        at_ms: u32,
+        /// Spark-cue duration in milliseconds.
+        duration_ms: u16,
+        /// Number of decorative spark particles.
+        sparks: u8,
+    },
+    /// Reinforces a successful terminal with a semantic approval decoration.
+    SuccessReinforced {
+        /// Stable terminal diagram-node ID.
+        target_id: String,
+        /// Measured terminal center.
+        point: Point,
+        /// Controlled simulation time in milliseconds.
+        at_ms: u32,
+    },
     /// Sweeps one decorative scanline across a measured node.
     ScanlineSwept {
         /// Stable target node ID.
@@ -680,21 +750,37 @@ pub fn generate_scene(request: &SceneRequest) -> Result<ScenePlan, SceneError> {
     validate_request(request)?;
     let mut choice_random = SceneRandom::new(request.seed);
     let mut timing_random = SceneRandom::new(request.seed ^ 0xe703_7ed1_a0b4_28db);
-    let layout = choice_random.layout();
-    let diagram = generate_diagram(
-        &request.content.diagram_labels,
-        choice_random.diagram_form(),
-    );
+    let animated_flow = request.recipe == SceneRecipe::AnimatedFlow;
+    let layout = if animated_flow {
+        LayoutProfile::DiagramLed
+    } else {
+        choice_random.layout()
+    };
+    let diagram_form = if animated_flow {
+        DiagramForm::Linear
+    } else {
+        choice_random.diagram_form()
+    };
+    let diagram = generate_diagram(&request.content.diagram_labels, diagram_form);
     let actions = generate_actions(&request.content.actions, &mut choice_random);
     let root = generate_tree(&request.content, &actions, layout);
-    let (effects, scripts) = generate_effects(
-        request,
-        &root,
-        &diagram,
-        &actions,
-        &mut choice_random,
-        &mut timing_random,
-    )?;
+    let (flow, effects, scripts) = if animated_flow {
+        (
+            Some(generate_flow_plan(request, &diagram, &mut timing_random)?),
+            Vec::new(),
+            Vec::new(),
+        )
+    } else {
+        let (effects, scripts) = generate_effects(
+            request,
+            &root,
+            &diagram,
+            &actions,
+            &mut choice_random,
+            &mut timing_random,
+        )?;
+        (None, effects, scripts)
+    };
     let plan = ScenePlan {
         format_version: SCENE_FORMAT_VERSION,
         seed: request.seed,
@@ -702,6 +788,7 @@ pub fn generate_scene(request: &SceneRequest) -> Result<ScenePlan, SceneError> {
         layout,
         root,
         diagram,
+        flow,
         effects,
         scripts,
     };
@@ -723,6 +810,12 @@ pub fn generate_scene(request: &SceneRequest) -> Result<ScenePlan, SceneError> {
 pub fn simulate_scene(input: &SceneSimulationInput) -> Result<SceneTrace, SceneError> {
     validate_plan(&input.plan, SceneBudgets::default())?;
     validate_geometry(&input.plan, &input.geometry)?;
+    if input.plan.recipe == SceneRecipe::AnimatedFlow {
+        return simulate_flow(input);
+    }
+    if matches!(input.trigger, InteractionTrigger::Flow { .. }) {
+        return Err(SceneError::UnknownInteraction);
+    }
     let script = input
         .plan
         .scripts
@@ -752,6 +845,128 @@ pub fn simulate_scene(input: &SceneSimulationInput) -> Result<SceneTrace, SceneE
         }
     }
     events.sort_by_key(event_time);
+    events.push(SceneEvent::InteractionFinished { at_ms: finish_ms });
+    Ok(SceneTrace {
+        format_version: input.plan.format_version,
+        seed: input.plan.seed,
+        trigger: input.trigger.clone(),
+        events,
+    })
+}
+
+fn generate_flow_plan(
+    request: &SceneRequest,
+    diagram: &DiagramPlan,
+    random: &mut SceneRandom,
+) -> Result<FlowPlan, SceneError> {
+    if request.budgets.max_phase_ms < 240 {
+        return Err(SceneError::BudgetExceeded("animated flow phase duration"));
+    }
+    let mut at_ms = 0_u32;
+    let mut edge_phases = Vec::with_capacity(diagram.edges.len());
+    for edge in &diagram.edges {
+        let duration_ms = random.range_u16(240, request.budgets.max_phase_ms.min(480));
+        edge_phases.push(FlowEdgePhase {
+            edge_id: edge.id.clone(),
+            at_ms,
+            duration_ms,
+        });
+        at_ms = at_ms.saturating_add(u32::from(duration_ms));
+    }
+    let terminal_id = diagram
+        .nodes
+        .last()
+        .map(|node| node.id.clone())
+        .ok_or(SceneError::InvalidContent("animated flow terminal"))?;
+    let displacement = i8::try_from(request.budgets.max_displacement).map_or(3, |value| value);
+    Ok(FlowPlan {
+        edge_phases,
+        terminal_id,
+        terminal_at_ms: at_ms,
+        failure_duration_ms: random.range_u16(140, request.budgets.max_phase_ms.min(260)),
+        failure_offset_x: random.signed_range(displacement),
+        failure_offset_y: random.signed_range(displacement),
+        disconnect_duration_ms: random.range_u16(120, request.budgets.max_phase_ms.min(240)),
+        disconnect_sparks: random.range_u8(1, 4),
+    })
+}
+
+fn simulate_flow(input: &SceneSimulationInput) -> Result<SceneTrace, SceneError> {
+    let flow = input
+        .plan
+        .flow
+        .as_ref()
+        .ok_or(SceneError::InvalidIdentifier("animated flow plan"))?;
+    let InteractionTrigger::Flow {
+        result_source: _,
+        final_disposition,
+        disconnected_edge,
+    } = &input.trigger
+    else {
+        return Err(SceneError::UnknownInteraction);
+    };
+    let disconnected_index = disconnected_edge
+        .as_ref()
+        .map(|id| {
+            flow.edge_phases
+                .iter()
+                .position(|phase| phase.edge_id == *id)
+                .ok_or(SceneError::InvalidIdentifier("disconnected edge"))
+        })
+        .transpose()?;
+    let mut events = vec![SceneEvent::InteractionStarted { at_ms: 0 }];
+    let mut finish_ms = 0_u32;
+    if *final_disposition != FinalDisposition::NotAttempted {
+        for (index, phase) in flow.edge_phases.iter().enumerate() {
+            if disconnected_index.is_some_and(|break_index| index >= break_index) {
+                break;
+            }
+            let (from, to) = measured_edge(&input.plan, &input.geometry, &phase.edge_id)?;
+            events.push(SceneEvent::EdgeTraversed {
+                edge_id: phase.edge_id.clone(),
+                from,
+                to,
+                at_ms: phase.at_ms,
+                duration_ms: phase.duration_ms,
+            });
+            finish_ms = phase.at_ms + u32::from(phase.duration_ms);
+        }
+        if let Some(index) = disconnected_index {
+            let phase = &flow.edge_phases[index];
+            let (from, to) = measured_edge(&input.plan, &input.geometry, &phase.edge_id)?;
+            events.push(SceneEvent::FlowDisconnected {
+                edge_id: phase.edge_id.clone(),
+                point: Point::new(from.x.midpoint(to.x), from.y.midpoint(to.y)),
+                at_ms: phase.at_ms,
+                duration_ms: flow.disconnect_duration_ms,
+                sparks: flow.disconnect_sparks,
+            });
+            finish_ms = phase.at_ms + u32::from(flow.disconnect_duration_ms);
+        } else {
+            let terminal = find_geometry(&input.geometry, &flow.terminal_id)?;
+            match final_disposition {
+                FinalDisposition::Succeeded => {
+                    events.push(SceneEvent::SuccessReinforced {
+                        target_id: flow.terminal_id.clone(),
+                        point: rect_center(terminal.rect),
+                        at_ms: flow.terminal_at_ms,
+                    });
+                    finish_ms = flow.terminal_at_ms;
+                }
+                FinalDisposition::Failed => {
+                    events.push(SceneEvent::BackingGlitched {
+                        target_id: flow.terminal_id.clone(),
+                        at_ms: flow.terminal_at_ms,
+                        duration_ms: flow.failure_duration_ms,
+                        offset_x: flow.failure_offset_x,
+                        offset_y: flow.failure_offset_y,
+                    });
+                    finish_ms = flow.terminal_at_ms + u32::from(flow.failure_duration_ms);
+                }
+                FinalDisposition::Unknown | FinalDisposition::NotAttempted => {}
+            }
+        }
+    }
     events.push(SceneEvent::InteractionFinished { at_ms: finish_ms });
     Ok(SceneTrace {
         format_version: input.plan.format_version,
@@ -802,7 +1017,9 @@ fn validate_request(request: &SceneRequest) -> Result<(), SceneError> {
     if !(2..=usize::from(request.budgets.max_diagram_nodes)).contains(&diagram_count) {
         return Err(SceneError::InvalidContent("diagram labels"));
     }
-    let worst_case_edges = if diagram_count > 3 {
+    let worst_case_edges = if request.recipe == SceneRecipe::AnimatedFlow {
+        diagram_count.saturating_sub(1)
+    } else if diagram_count > 3 {
         diagram_count + 1
     } else {
         diagram_count.saturating_sub(1)
@@ -818,7 +1035,9 @@ fn validate_request(request: &SceneRequest) -> Result<(), SceneError> {
     {
         return Err(SceneError::InvalidContent("actions"));
     }
-    if request.content.actions.len() >= usize::from(request.budgets.max_effects) {
+    if request.recipe != SceneRecipe::AnimatedFlow
+        && request.content.actions.len() >= usize::from(request.budgets.max_effects)
+    {
         return Err(SceneError::BudgetExceeded("action and load effects"));
     }
     if request.content.actions.len() + 9 > usize::from(request.budgets.max_nodes) {
@@ -1121,6 +1340,11 @@ fn generate_effects(
         SceneRecipe::Calm => 2,
         SceneRecipe::Balanced => 4,
         SceneRecipe::Vivid => 6,
+        SceneRecipe::AnimatedFlow => {
+            return Err(SceneError::InvalidContent(
+                "animated flow effect generation",
+            ));
+        }
     };
     let action_effects = actions.len();
     let effect_limit = usize::from(request.budgets.max_effects);
@@ -1162,7 +1386,9 @@ fn generate_effects(
             timing_random,
         );
         scripts.push(InteractionScript {
-            trigger: InteractionTrigger::Action(action.id.clone()),
+            trigger: InteractionTrigger::Action {
+                action_id: action.id.clone(),
+            },
             effect_ids: vec![effect.id.clone()],
         });
         effects.push(effect);
@@ -1265,29 +1491,14 @@ fn validate_plan(plan: &ScenePlan, budgets: SceneBudgets) -> Result<(), SceneErr
     if node_ids.len() > usize::from(budgets.max_nodes) {
         return Err(SceneError::BudgetExceeded("scene and action nodes"));
     }
-    let diagram_node_limit = usize::from(budgets.max_diagram_nodes);
-    if plan.diagram.nodes.len() > diagram_node_limit {
-        return Err(SceneError::BudgetExceeded("diagram nodes"));
+    let edge_ids = validate_diagram(plan, budgets, &mut node_ids)?;
+    if plan.recipe == SceneRecipe::AnimatedFlow {
+        return validate_animated_flow_shape(plan, budgets);
     }
-    let diagram_edge_limit = usize::from(budgets.max_diagram_edges);
-    if plan.diagram.edges.len() > diagram_edge_limit {
-        return Err(SceneError::BudgetExceeded("diagram edges"));
-    }
-    for node in &plan.diagram.nodes {
-        if node_ids.contains(&node.id) {
-            return Err(SceneError::InvalidIdentifier("duplicate node"));
-        }
-        node_ids.push(node.id.clone());
-    }
-    let mut edge_ids = Vec::new();
-    for edge in &plan.diagram.edges {
-        if edge_ids.contains(&edge.id)
-            || !node_ids.contains(&edge.from)
-            || !node_ids.contains(&edge.to)
-        {
-            return Err(SceneError::InvalidIdentifier("diagram edge"));
-        }
-        edge_ids.push(edge.id.clone());
+    if plan.flow.is_some() {
+        return Err(SceneError::InvalidIdentifier(
+            "unexpected animated flow plan",
+        ));
     }
     if plan.effects.len() > usize::from(budgets.max_effects) {
         return Err(SceneError::BudgetExceeded("effects"));
@@ -1305,10 +1516,13 @@ fn validate_plan(plan: &ScenePlan, budgets: SceneBudgets) -> Result<(), SceneErr
         if triggers.contains(&script.trigger) {
             return Err(SceneError::InvalidIdentifier("duplicate interaction"));
         }
-        if let InteractionTrigger::Action(action_id) = &script.trigger {
+        if let InteractionTrigger::Action { action_id } = &script.trigger {
             if !action_ids.contains(action_id) {
                 return Err(SceneError::InvalidIdentifier("interaction action"));
             }
+        }
+        if matches!(script.trigger, InteractionTrigger::Flow { .. }) {
+            return Err(SceneError::InvalidIdentifier("receipt flow interaction"));
         }
         triggers.push(script.trigger.clone());
         if script.effect_ids.is_empty()
@@ -1334,11 +1548,135 @@ fn validate_plan(plan: &ScenePlan, budgets: SceneBudgets) -> Result<(), SceneErr
         validate_live_effects(&script_effects, budgets.max_live_effects)?;
     }
     if !triggers.contains(&InteractionTrigger::Load)
-        || action_ids
-            .iter()
-            .any(|action_id| !triggers.contains(&InteractionTrigger::Action(action_id.clone())))
+        || action_ids.iter().any(|action_id| {
+            !triggers.contains(&InteractionTrigger::Action {
+                action_id: action_id.clone(),
+            })
+        })
     {
         return Err(SceneError::InvalidIdentifier("missing interaction"));
+    }
+    Ok(())
+}
+
+fn validate_diagram(
+    plan: &ScenePlan,
+    budgets: SceneBudgets,
+    node_ids: &mut Vec<String>,
+) -> Result<Vec<String>, SceneError> {
+    if plan.diagram.nodes.len() > usize::from(budgets.max_diagram_nodes) {
+        return Err(SceneError::BudgetExceeded("diagram nodes"));
+    }
+    if plan.diagram.edges.len() > usize::from(budgets.max_diagram_edges) {
+        return Err(SceneError::BudgetExceeded("diagram edges"));
+    }
+    for node in &plan.diagram.nodes {
+        if node_ids.contains(&node.id) {
+            return Err(SceneError::InvalidIdentifier("duplicate node"));
+        }
+        node_ids.push(node.id.clone());
+    }
+    let mut edge_ids = Vec::new();
+    for edge in &plan.diagram.edges {
+        if edge_ids.contains(&edge.id)
+            || !node_ids.contains(&edge.from)
+            || !node_ids.contains(&edge.to)
+        {
+            return Err(SceneError::InvalidIdentifier("diagram edge"));
+        }
+        edge_ids.push(edge.id.clone());
+    }
+    Ok(edge_ids)
+}
+
+fn validate_animated_flow_shape(plan: &ScenePlan, budgets: SceneBudgets) -> Result<(), SceneError> {
+    if plan.layout != LayoutProfile::DiagramLed
+        || plan.diagram.form != DiagramForm::Linear
+        || !plan.effects.is_empty()
+        || !plan.scripts.is_empty()
+    {
+        return Err(SceneError::InvalidIdentifier("animated flow shape"));
+    }
+    validate_linear_topology(&plan.diagram)?;
+    let flow = plan
+        .flow
+        .as_ref()
+        .ok_or(SceneError::InvalidIdentifier("animated flow plan"))?;
+    validate_flow_plan(plan, flow, budgets)
+}
+
+fn validate_linear_topology(diagram: &DiagramPlan) -> Result<(), SceneError> {
+    if diagram.nodes.len() != diagram.edges.len().saturating_add(1) {
+        return Err(SceneError::InvalidIdentifier(
+            "animated flow linear topology",
+        ));
+    }
+    for (index, edge) in diagram.edges.iter().enumerate() {
+        let source = &diagram.nodes[index];
+        let target = &diagram.nodes[index + 1];
+        if edge.from != source.id || edge.to != target.id || source.terminal {
+            return Err(SceneError::InvalidIdentifier(
+                "animated flow linear topology",
+            ));
+        }
+    }
+    Ok(())
+}
+
+fn validate_flow_plan(
+    plan: &ScenePlan,
+    flow: &FlowPlan,
+    budgets: SceneBudgets,
+) -> Result<(), SceneError> {
+    if flow.edge_phases.len() != plan.diagram.edges.len() || flow.edge_phases.is_empty() {
+        return Err(SceneError::InvalidIdentifier("animated flow edge phases"));
+    }
+    let mut expected_at_ms = 0_u32;
+    for (phase, edge) in flow.edge_phases.iter().zip(&plan.diagram.edges) {
+        if phase.edge_id != edge.id || phase.at_ms != expected_at_ms {
+            return Err(SceneError::InvalidIdentifier("animated flow edge order"));
+        }
+        if !(240..=480).contains(&phase.duration_ms) || phase.duration_ms > budgets.max_phase_ms {
+            return Err(SceneError::BudgetExceeded("animated flow traversal"));
+        }
+        expected_at_ms = expected_at_ms.saturating_add(u32::from(phase.duration_ms));
+    }
+    let terminal = plan
+        .diagram
+        .nodes
+        .last()
+        .ok_or(SceneError::InvalidIdentifier("animated flow terminal"))?;
+    if flow.terminal_id != terminal.id
+        || !terminal.terminal
+        || flow.terminal_at_ms != expected_at_ms
+    {
+        return Err(SceneError::InvalidIdentifier("animated flow terminal"));
+    }
+    let displacement_limit = i16::from(budgets.max_displacement);
+    if !(140..=260).contains(&flow.failure_duration_ms)
+        || flow.failure_duration_ms > budgets.max_phase_ms
+        || i16::from(flow.failure_offset_x).abs() > displacement_limit
+        || i16::from(flow.failure_offset_y).abs() > displacement_limit
+        || !(120..=240).contains(&flow.disconnect_duration_ms)
+        || flow.disconnect_duration_ms > budgets.max_phase_ms
+        || !(1..=4).contains(&flow.disconnect_sparks)
+    {
+        return Err(SceneError::BudgetExceeded("animated flow cue"));
+    }
+    let terminal_finish = flow
+        .terminal_at_ms
+        .saturating_add(u32::from(flow.failure_duration_ms));
+    let disconnect_finish = flow.edge_phases.iter().fold(0, |finish, phase| {
+        finish.max(
+            phase
+                .at_ms
+                .saturating_add(u32::from(flow.disconnect_duration_ms)),
+        )
+    });
+    if terminal_finish.max(disconnect_finish) > budgets.max_interaction_ms {
+        return Err(SceneError::BudgetExceeded(
+            "animated flow interaction duration",
+        ));
     }
     Ok(())
 }
@@ -1462,6 +1800,11 @@ fn validate_effect(
 }
 
 fn validate_geometry(plan: &ScenePlan, geometry: &[NodeGeometry]) -> Result<(), SceneError> {
+    let mut valid_ids = Vec::new();
+    collect_geometry_ids(&plan.root, &mut valid_ids);
+    for node in &plan.diagram.nodes {
+        push_unique(&mut valid_ids, &node.id);
+    }
     let mut required = Vec::new();
     for effect in &plan.effects {
         match &effect.target {
@@ -1478,10 +1821,18 @@ fn validate_geometry(plan: &ScenePlan, geometry: &[NodeGeometry]) -> Result<(), 
             }
         }
     }
+    if plan.flow.is_some() {
+        for node in &plan.diagram.nodes {
+            push_unique(&mut required, &node.id);
+        }
+    }
     let mut seen = Vec::new();
     for measurement in geometry {
         if seen.contains(&measurement.id) {
             return Err(SceneError::InvalidGeometry("duplicate node"));
+        }
+        if !valid_ids.contains(&measurement.id) {
+            return Err(SceneError::InvalidGeometry("stale node"));
         }
         seen.push(measurement.id.clone());
         if !rect_is_valid(measurement.rect)
@@ -1494,7 +1845,102 @@ fn validate_geometry(plan: &ScenePlan, geometry: &[NodeGeometry]) -> Result<(), 
     if required.iter().any(|id| !seen.contains(id)) {
         return Err(SceneError::InvalidGeometry("missing required node"));
     }
+    if plan.flow.is_some() {
+        validate_flow_geometry(plan, geometry)?;
+    }
     Ok(())
+}
+
+fn validate_flow_geometry(plan: &ScenePlan, geometry: &[NodeGeometry]) -> Result<(), SceneError> {
+    for edge in &plan.diagram.edges {
+        let source = find_geometry(geometry, &edge.from)?;
+        let target = find_geometry(geometry, &edge.to)?;
+        if !point_on_rect_boundary(source.rect, source.outgoing)
+            || !point_on_rect_boundary(target.rect, target.incoming)
+        {
+            return Err(SceneError::InvalidGeometry("animated flow boundary port"));
+        }
+        if points_are_equal(source.outgoing, target.incoming) {
+            return Err(SceneError::InvalidGeometry(
+                "animated flow zero-length edge",
+            ));
+        }
+        for node in &plan.diagram.nodes {
+            let measurement = find_geometry(geometry, &node.id)?;
+            if segment_enters_rect(source.outgoing, target.incoming, measurement.rect) {
+                return Err(SceneError::InvalidGeometry(
+                    "animated flow crosses node interior",
+                ));
+            }
+        }
+    }
+    Ok(())
+}
+
+fn collect_geometry_ids(node: &SceneNode, ids: &mut Vec<String>) {
+    push_unique(ids, &node.id);
+    if let SceneNodeContent::Actions { items } = &node.content {
+        for action in items {
+            push_unique(ids, &action.id);
+        }
+    }
+    for child in &node.children {
+        collect_geometry_ids(child, ids);
+    }
+}
+
+fn points_are_equal(left: Point, right: Point) -> bool {
+    const EPSILON: f64 = 0.001;
+    (left.x - right.x).abs() <= EPSILON && (left.y - right.y).abs() <= EPSILON
+}
+
+fn point_on_rect_boundary(rect: Rect, point: Point) -> bool {
+    const EPSILON: f64 = 0.001;
+    let within_x = point.x + EPSILON >= rect.x && point.x <= rect.x + rect.width + EPSILON;
+    let within_y = point.y + EPSILON >= rect.y && point.y <= rect.y + rect.height + EPSILON;
+    let on_vertical =
+        (point.x - rect.x).abs() <= EPSILON || (point.x - (rect.x + rect.width)).abs() <= EPSILON;
+    let on_horizontal =
+        (point.y - rect.y).abs() <= EPSILON || (point.y - (rect.y + rect.height)).abs() <= EPSILON;
+    within_x && within_y && (on_vertical || on_horizontal)
+}
+
+fn segment_enters_rect(from: Point, to: Point, rect: Rect) -> bool {
+    const EPSILON: f64 = 0.001;
+    let left = rect.x + EPSILON;
+    let right = rect.x + rect.width - EPSILON;
+    let top = rect.y + EPSILON;
+    let bottom = rect.y + rect.height - EPSILON;
+    if left >= right || top >= bottom {
+        return false;
+    }
+    let dx = to.x - from.x;
+    let dy = to.y - from.y;
+    let mut minimum = 0.0_f64;
+    let mut maximum = 1.0_f64;
+    for (p, q) in [
+        (-dx, from.x - left),
+        (dx, right - from.x),
+        (-dy, from.y - top),
+        (dy, bottom - from.y),
+    ] {
+        if p.abs() <= f64::EPSILON {
+            if q < 0.0 {
+                return false;
+            }
+        } else {
+            let ratio = q / p;
+            if p < 0.0 {
+                minimum = minimum.max(ratio);
+            } else {
+                maximum = maximum.min(ratio);
+            }
+            if minimum > maximum {
+                return false;
+            }
+        }
+    }
+    minimum <= maximum && maximum >= 0.0 && minimum <= 1.0
 }
 
 fn push_unique(values: &mut Vec<String>, value: &str) {
@@ -1514,6 +1960,8 @@ fn rect_is_valid(rect: Rect) -> bool {
         && rect.height.is_finite()
         && rect.width > 0.0
         && rect.height > 0.0
+        && (rect.x + rect.width).is_finite()
+        && (rect.y + rect.height).is_finite()
 }
 
 fn push_effect_event(
@@ -1634,6 +2082,8 @@ fn event_time(event: &SceneEvent) -> u32 {
         | SceneEvent::FragmentsEmitted { at_ms, .. }
         | SceneEvent::EdgeTraversed { at_ms, .. }
         | SceneEvent::PacketTraversed { at_ms, .. }
+        | SceneEvent::FlowDisconnected { at_ms, .. }
+        | SceneEvent::SuccessReinforced { at_ms, .. }
         | SceneEvent::ScanlineSwept { at_ms, .. }
         | SceneEvent::InteractionFinished { at_ms } => *at_ms,
     }

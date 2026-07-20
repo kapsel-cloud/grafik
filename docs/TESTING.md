@@ -13,15 +13,13 @@ Run the narrowest proof first:
 1. Native interface tests prove deterministic scene generation, budget enforcement, stable tree and
    topology IDs, measured-geometry validation, interaction ordering, route exclusion, and bounded
    timing through `grafik::generate_scene` and `grafik::simulate_scene`.
-2. Existing native outcome-tracer tests remain until that implementation is absorbed.
-3. WASM build proof verifies the shallow adapter compiles and generates browser bindings.
-4. Dependency-free Node tests prove the standalone lab uses only local Grafik assets and the concrete
+2. WASM build proof verifies the shallow adapter compiles and generates browser bindings.
+3. Dependency-free Node tests prove the standalone lab uses only local Grafik assets and the concrete
    adapter maps every scene primitive, measured anchor, interaction, and reduced-motion trace without
    ambient randomness.
-5. Manual browser proof checks the candidate grid, clickable interactions, real geometry, connector
-   placement, resize behavior, no-JavaScript reading, reduced motion, 320 CSS-pixel reflow, and console
-   errors.
-6. `cargo make check` is the complete local default gate.
+4. Manual browser proof checks flow controls, real geometry, connector placement, resize behavior,
+   no-JavaScript reading, reduced motion, 320 CSS-pixel reflow, and console errors.
+5. `cargo make check` is the complete local default gate.
 
 Tests exercise public interfaces. Moving a test outward must not widen the production interface.
 
@@ -30,20 +28,6 @@ Tests exercise public interfaces. Moving a test outward must not widen the produ
 Default tests must not depend on wall clock, ambient randomness, network access, locale, filesystem
 order, or live services. Use explicit geometry, nonzero seeds, integer simulation time, sorted output,
 and exact trace comparison. A replay failure must print the seed and input through the assertion.
-
-Required native behaviors:
-
-- all four final dispositions and their simulated or recorded source remain distinct in the public
-  trace and JSON;
-- identical input and seed produce identical complete traces and JSON;
-- invalid or overlapping geometry fails before producing events;
-- grown segments remain outside panel interiors except at selected ports;
-- `SUCCEEDED` emits weighted progress, one bounded pulse, and leaf-first retraction;
-- `FAILED` emits one bounded decorative glitch and no successful progress;
-- `UNKNOWN` emits a two-second seeded burst at 1–3 marks per second, with normal and rare density
-  limits independently asserted;
-- `NOT_ATTEMPTED` emits no receiver cue;
-- every profile's density, lifetime, displacement, and duration remain within `PATTERNS.md` budgets.
 
 ## Snapshot vocabulary and policy
 
@@ -93,6 +77,25 @@ Required receipt-scene behaviors:
 - every live-effect, density, lifetime, displacement, fragment, phase, and total-duration budget holds;
 - no event can target or move readable text; and
 - the complete default gate reads or writes no sibling checkout.
+
+Required animated-flow behaviors:
+
+- the curated fixture contains exactly `grant`, `journal`, `provider seam`, `observe`, and `receipt`
+  in one linear topology with directed edges in that order;
+- every complete connected replay traverses each declared edge exactly once in declared order using
+  measured boundary ports, and no segment enters any node interior except at its endpoint ports;
+- disconnecting each edge in turn preserves topology, traverses only preceding edges, emits exactly
+  one bounded break and spark cue, and emits no terminal cue;
+- changing among `SUCCEEDED`, `FAILED`, and `UNKNOWN` preserves topology and explicit result text;
+- a connected success emits one terminal approval role, a connected failure glitches only the
+  terminal decorative backing, and unknown emits neither cue;
+- byte-equivalent plan, geometry, interaction, outcome, and disconnect produce identical complete
+  trace JSON;
+- invalid outcomes, unknown disconnect IDs, missing or non-finite ports, and interior-crossing routes
+  fail before events are returned; and
+- adapter tests prove visible arrow markers, native pressed controls, explicit break projection,
+  pointer-inert `aria-hidden` decorations, reduced-motion timer suppression, and no ambient
+  randomness.
 
 ## Browser evidence
 

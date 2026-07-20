@@ -57,6 +57,23 @@
   text-transform: uppercase;
 }
 
+.flow-control-group {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.flow-control-group > span {
+  color: var(--muted);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.flow-control-group button[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
 .lab-controls input,
 .lab-controls select,
 .lab-controls button,
@@ -101,6 +118,25 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1.2rem;
+}
+
+.flow-stage {
+  min-width: 0;
+  padding: 0.8rem;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--paper) 94%, transparent);
+  box-shadow: 0.45rem 0.45rem 0 rgb(40 46 52 / 9%);
+}
+
+.flow-fallback {
+  padding: 1rem;
+  border: 1px solid var(--line);
+  background: var(--paper);
+}
+
+.flow-fallback h2 {
+  overflow-wrap: anywhere;
+  font-family: system-ui, sans-serif;
 }
 
 .scene-candidate {
@@ -427,6 +463,15 @@
   vector-effect: non-scaling-stroke;
 }
 
+.scene-diagram-edges marker path {
+  fill: var(--field);
+}
+
+.scene-diagram-edges line.is-disconnected {
+  stroke: var(--accent);
+  stroke-dasharray: 0.42 0.16 0.42;
+}
+
 .scene-diagram-nodes {
   position: relative;
   z-index: 1;
@@ -514,6 +559,22 @@
 .scene-fragment {
   fill: var(--accent);
   animation: scene-fragment var(--effect-ms) ease-out;
+}
+
+.scene-disconnect-sparks circle {
+  fill: var(--accent);
+  animation: scene-spark var(--effect-ms) ease-out;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.scene-success-reinforcement {
+  position: absolute;
+  z-index: 2;
+  top: 0.2rem;
+  right: 0.25rem;
+  pointer-events: none;
+  font-size: 1.1rem;
 }
 
 .scene-inspector {
@@ -630,6 +691,17 @@
   }
 }
 
+@keyframes scene-spark {
+  from {
+    opacity: 1;
+    transform: rotate(calc(var(--spark-index) * 72deg)) translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: rotate(calc(var(--spark-index) * 72deg)) translateX(1rem);
+  }
+}
+
 @media (max-width: 1000px) {
   .scene-gallery {
     grid-template-columns: 1fr;
@@ -656,7 +728,7 @@
 
   .scene-diagram-nodes,
   .scene-node[data-diagram-form] .scene-diagram-nodes {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
   }
 
   .scene-inspector {
@@ -673,7 +745,8 @@
   .scene-effect-backing,
   .scene-edge-traversal,
   .scene-packet,
-  .scene-fragment {
+  .scene-fragment,
+  .scene-disconnect-sparks circle {
     animation: none;
   }
 }

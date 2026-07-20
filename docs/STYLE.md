@@ -14,8 +14,8 @@
 - Product code must not use `unwrap`, `expect`, `panic`, `unimplemented`, `todo`, `dbg`, stdout, or
   stderr printing. Tests may return `Result` and use assertions rather than bypassing these rules.
 - Keep physical Rust source lines at or below 100 bytes.
-- Prefer domain names: `Panel`, `EdgePort`, `Trace`, and `SpatialEvent`. Do not hide domain behavior
-  in generic helpers.
+- Prefer domain names: `ScenePlan`, `NodeGeometry`, `FlowPlan`, and `SceneEvent`. Do not hide domain
+  behavior in generic helpers.
 - Public fallible functions document `# Errors`. Public examples are doctested.
 - Return values instead of side effects. Accept seed, geometry, and time inputs rather than creating
   ambient dependencies.

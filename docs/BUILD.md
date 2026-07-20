@@ -81,16 +81,17 @@ artifact explicitly and make its own reviewed repository change.
 
 ## Browser tracer
 
-Build bindings before serving the simulated outcome tracer:
+Build bindings before serving the animated flow tracer:
 
 ```sh
 cargo make wasm
 cargo make serve
 ```
 
-Open `http://127.0.0.1:4174`. `serve` runs
-`python3 -m http.server 4174 --bind 127.0.0.1 --directory web` and remains in the foreground until
-interrupted. No generated binding is committed; rerun `cargo make wasm` after Rust changes.
+Open `http://127.0.0.1:4174` or `/lab.html`; both host the same standalone animated flow lab.
+`serve` runs `python3 -m http.server 4174 --bind 127.0.0.1 --directory web` and remains in the
+foreground until interrupted. No generated binding is committed; rerun `cargo make wasm` after Rust
+changes.
 
 ## Authoritative inputs
 

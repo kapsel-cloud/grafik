@@ -1,6 +1,6 @@
 # Prove the animated flow tracer
 
-- **Status:** Ready
+- **Status:** Complete
 - **Blocked by:** None
 - **Direct owners:** [`../docs/SCOPE.md`](../docs/SCOPE.md),
   [`../docs/PATTERNS.md`](../docs/PATTERNS.md), [`../docs/SIMULATION.md`](../docs/SIMULATION.md),
@@ -66,8 +66,35 @@ cargo make test-web
 cargo make check
 ```
 
+## Evidence
+
+- `cargo make test` (2026-07-21): passed 14 native tests, including ordered flow replay, every
+  disconnect position, outcome cues, deterministic JSON, topology drift, stale/non-finite geometry,
+  boundary ports, and interior exclusion.
+- `cargo make test-web` (2026-07-21): passed eight dependency-free adapter/lab tests, including
+  horizontal and responsive vertical ports, arrow and break projection, flow events, terminal
+  backing isolation, reduced-motion timer suppression, native controls, and no-JavaScript content.
+- `cargo make check` (2026-07-21): passed the complete format, width, whitespace, Clippy, rustdoc,
+  native test, WASM artifact, and browser-adapter gate after removing the parallel legacy tracer.
+- Real-browser review in headless Chromium 149.0.7827.55 (2026-07-21) passed at 320 CSS px in light
+  mode: document and body widths remained 320 px with no overflowing visible element; all five flow
+  nodes reflowed vertically; the no-JavaScript fixture and simulated provenance remained readable;
+  and WCAG text-spacing overrides introduced no horizontal overflow.
+- Chromium's full accessibility tree exposed the named outcome and disconnect groups, seed
+  spinbutton, native pressed buttons, live status, headings, ordered evidence list, captioned table,
+  details controls, and both replay buttons. Decorative SVG and effect layers remained absent from
+  the tree. Keyboard activation selected `FAILED`, selected `grant -> journal`, updated the explicit
+  result, and replayed while retaining focus.
+- Reduced-motion emulation matched the media query, produced zero running animations and no trace
+  overlay children, retained the explicit `SUCCEEDED` result, and applied only the static hidden
+  approval mark. Light and dark preference screenshots were manually reviewed at 1280 CSS px;
+  responsive, no-JavaScript, text-spacing, and reduced-motion screenshots were reviewed at 320 CSS
+  px. Connector direction, vertical reflow, hierarchy, contrast, focus styling, and both palettes
+  were visually coherent. The browser console and page-error stream remained empty.
+
 ## Residual risk
 
-A polished simulated tracer proves explanation and rendering behavior only. It does not prove that
-operators need a batch explorer, that logs share a stable schema, or that live Kapsel integration is
-safe or useful.
+The browser proof covers one Chromium build and programmatic preference emulation, not Safari,
+Firefox, a physical reduced-motion setting, or a screen reader. The simulated tracer proves
+explanation and rendering behavior only; it does not prove that operators need a batch explorer,
+that logs share a stable schema, or that live Kapsel integration is safe or useful.

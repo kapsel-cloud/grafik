@@ -13,9 +13,11 @@ WEB = ROOT / "web"
 DIST = ROOT / "dist"
 BROWSER_FILES = (
     "index.html",
-    "main.js",
+    "lab.html",
+    "lab.js",
+    "lab.css",
+    "scene-adapter.js",
     "style.css",
-    "svg-adapter.js",
     "pkg/grafik.js",
     "pkg/grafik_bg.wasm",
 )

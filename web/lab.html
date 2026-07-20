@@ -4,11 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#e5e2d9" />
-    <meta
-      name="description"
-      content="Standalone Grafik lab for seeded renderer-neutral receipt scenes."
-    />
-    <title>Grafik scene lab</title>
+    <meta name="description" content="Standalone Grafik lab for a seeded animated flow." />
+    <title>Grafik animated flow lab</title>
     <link rel="stylesheet" href="./style.css" />
     <link rel="stylesheet" href="./lab.css" />
     <script type="module" src="./lab.js"></script>
@@ -17,45 +14,64 @@
     <header class="lab-header">
       <div>
         <p class="kicker">Standalone Grafik lab · simulated content · current worktree</p>
-        <h1>Seeded receipt scene workshop</h1>
+        <h1>Animated flow tracer</h1>
         <p class="lab-intro">
-          Rust generates each view tree, grid role, diagram, button size, pattern, phase, and
-          interaction script. This browser adapter only renders and measures the plans.
+          Rust owns one deterministic logical flow and its renderer-neutral timed trace. The browser
+          renders, measures, and replays it without a live service or product authority.
         </p>
       </div>
-      <div class="lab-controls" aria-label="Scene generation controls">
+      <div class="lab-controls" aria-label="Flow controls">
         <label>seed <input data-seed type="number" min="1" value="424242" /></label>
-        <label>
-          recipe
-          <select data-recipe>
-            <option value="calm">calm</option>
-            <option value="balanced" selected>balanced</option>
-            <option value="vivid">vivid</option>
-          </select>
-        </label>
-        <button type="button" data-window-step="-6">Previous six</button>
-        <button type="button" data-window-step="6">Next six</button>
+        <div class="flow-control-group" role="group" aria-label="Select outcome">
+          <span>outcome</span>
+          <button type="button" data-outcome="SUCCEEDED" aria-pressed="true">SUCCEEDED</button>
+          <button type="button" data-outcome="FAILED" aria-pressed="false">FAILED</button>
+          <button type="button" data-outcome="UNKNOWN" aria-pressed="false">UNKNOWN</button>
+        </div>
+        <div
+          class="flow-control-group"
+          data-disconnect-controls
+          role="group"
+          aria-label="Select disconnected edge"
+        >
+          <button type="button" aria-pressed="true">No disconnect</button>
+        </div>
+        <button type="button" data-replay>Replay flow</button>
       </div>
-      <p class="lab-status" data-status aria-live="polite">Building local WASM scenes…</p>
+      <p class="lab-status" data-status aria-live="polite">Building local WASM flow…</p>
     </header>
 
     <main class="lab-main">
-      <section class="scene-gallery" data-gallery aria-label="Generated receipt scenes"></section>
+      <section class="flow-stage" aria-label="Animated external-effect flow">
+        <div data-flow-mount>
+          <article class="flow-fallback">
+            <p class="kicker">Readable without JavaScript · simulated fixture</p>
+            <h2>grant → journal → provider seam → observe → receipt</h2>
+            <ol>
+              <li>grant</li>
+              <li>journal</li>
+              <li>provider seam</li>
+              <li>observe</li>
+              <li>receipt — <strong>SUCCEEDED</strong></li>
+            </ol>
+            <p>Motion is decorative. No external operation is performed.</p>
+          </article>
+        </div>
+      </section>
 
-      <aside class="scene-inspector" aria-label="Selected scene inspector">
+      <aside class="scene-inspector" aria-label="Flow plan and trace inspector">
         <div class="inspector-heading">
           <div>
-            <p class="kicker">Selected candidate</p>
-            <h2 data-selection-title>Select a generated scene</h2>
+            <p class="kicker">Current fixture</p>
+            <h2 data-selection-title>Waiting for generated flow</h2>
           </div>
-          <button type="button" data-replay-selected disabled>Replay selected</button>
         </div>
         <details open>
           <summary>Scene plan</summary>
-          <pre data-scene-json>Waiting for selection…</pre>
+          <pre data-scene-json>Waiting for generated plan…</pre>
         </details>
         <details>
-          <summary>Latest interaction trace</summary>
+          <summary>Measured input and latest trace</summary>
           <pre data-trace-json>No interaction yet.</pre>
         </details>
       </aside>
@@ -65,5 +81,6 @@
       Grafik-only files · no sibling checkout · no live service · no credentials · experimental
       schema
     </footer>
+    <noscript>The complete simulated flow and explicit SUCCEEDED fallback remain readable above.</noscript>
   </body>
 </html>

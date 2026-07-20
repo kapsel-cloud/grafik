@@ -4,60 +4,83 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#e5e2d9" />
-    <meta
-      name="description"
-      content="Grafik — living diagrams for executable product explanations."
-    />
-    <title>Grafik</title>
+    <meta name="description" content="Standalone Grafik lab for a seeded animated flow." />
+    <title>Grafik animated flow lab</title>
     <link rel="stylesheet" href="./style.css" />
-    <script type="module" src="./main.js"></script>
+    <link rel="stylesheet" href="./lab.css" />
+    <script type="module" src="./lab.js"></script>
   </head>
-  <body>
-    <main class="diagram" data-diagram>
-      <svg class="field" aria-hidden="true">
-        <g data-connector></g>
-      </svg>
-
-      <header class="panel hero" data-panel="hero">
-        <p class="kicker">Grafik · simulated result tracer</p>
-        <h1>Living diagrams for executable product explanations.</h1>
-        <p>
-          A seeded Rust simulation evolves one spatial field. The browser measures panels and
-          renders its events without giving WASM control of the page.
+  <body class="lab-body">
+    <header class="lab-header">
+      <div>
+        <p class="kicker">Standalone Grafik lab · simulated content · current worktree</p>
+        <h1>Animated flow tracer</h1>
+        <p class="lab-intro">
+          Rust owns one deterministic logical flow and its renderer-neutral timed trace. The browser
+          renders, measures, and replays it without a live service or product authority.
         </p>
-      </header>
+      </div>
+      <div class="lab-controls" aria-label="Flow controls">
+        <label>seed <input data-seed type="number" min="1" value="424242" /></label>
+        <div class="flow-control-group" role="group" aria-label="Select outcome">
+          <span>outcome</span>
+          <button type="button" data-outcome="SUCCEEDED" aria-pressed="true">SUCCEEDED</button>
+          <button type="button" data-outcome="FAILED" aria-pressed="false">FAILED</button>
+          <button type="button" data-outcome="UNKNOWN" aria-pressed="false">UNKNOWN</button>
+        </div>
+        <div
+          class="flow-control-group"
+          data-disconnect-controls
+          role="group"
+          aria-label="Select disconnected edge"
+        >
+          <button type="button" aria-pressed="true">No disconnect</button>
+        </div>
+        <button type="button" data-replay>Replay flow</button>
+      </div>
+      <p class="lab-status" data-status aria-live="polite">Building local WASM flow…</p>
+    </header>
 
-      <section class="panel receipt" data-panel="receipt" aria-labelledby="receipt-title">
-        <div>
-          <p class="kicker">Simulated input · deterministic presentation · experimental</p>
-          <h2 id="receipt-title">One bounded result. One replayable explanation.</h2>
+    <main class="lab-main">
+      <section class="flow-stage" aria-label="Animated external-effect flow">
+        <div data-flow-mount>
+          <article class="flow-fallback">
+            <p class="kicker">Readable without JavaScript · simulated fixture</p>
+            <h2>grant → journal → provider seam → observe → receipt</h2>
+            <ol>
+              <li>grant</li>
+              <li>journal</li>
+              <li>provider seam</li>
+              <li>observe</li>
+              <li>receipt — <strong>SUCCEEDED</strong></li>
+            </ol>
+            <p>Motion is decorative. No external operation is performed.</p>
+          </article>
         </div>
-        <dl>
-          <div>
-            <dt>result</dt>
-            <dd class="outcome-value" data-outcome-target>
-              <span class="outcome-effect-layer" data-outcome-layer aria-hidden="true"></span>
-              <span class="outcome-text" data-result-text>SUCCEEDED</span>
-            </dd>
-          </div>
-          <div><dt>source</dt><dd data-result-source>simulated input · no external operation</dd></div>
-          <div><dt>rendering</dt><dd>seeded Rust/WASM · browser adapter</dd></div>
-        </dl>
-        <div class="profile-controls" data-outcome-controls hidden>
-          <div class="outcome-buttons" role="group" aria-label="Preview outcome">
-            <button type="button" data-outcome="SUCCEEDED" aria-pressed="true">SUCCEEDED</button>
-            <button type="button" data-outcome="FAILED" aria-pressed="false">FAILED</button>
-            <button type="button" data-outcome="UNKNOWN" aria-pressed="false">UNKNOWN</button>
-          </div>
-          <label class="seed-control">seed <input data-seed type="number" min="1" value="424242" /></label>
-        </div>
-        <p class="status" data-status aria-live="polite">Preparing simulated result…</p>
       </section>
 
-      <aside class="limits" aria-label="Current limits">
-        Simulated, not live · no external connection · no browser authority · no credentials
+      <aside class="scene-inspector" aria-label="Flow plan and trace inspector">
+        <div class="inspector-heading">
+          <div>
+            <p class="kicker">Current fixture</p>
+            <h2 data-selection-title>Waiting for generated flow</h2>
+          </div>
+        </div>
+        <details open>
+          <summary>Scene plan</summary>
+          <pre data-scene-json>Waiting for generated plan…</pre>
+        </details>
+        <details>
+          <summary>Measured input and latest trace</summary>
+          <pre data-trace-json>No interaction yet.</pre>
+        </details>
       </aside>
     </main>
-    <noscript>Grafik's panels remain readable, but this tracer needs JavaScript to render WASM.</noscript>
+
+    <footer class="lab-footer">
+      Grafik-only files · no sibling checkout · no live service · no credentials · experimental
+      schema
+    </footer>
+    <noscript>The complete simulated flow and explicit SUCCEEDED fallback remain readable above.</noscript>
   </body>
 </html>

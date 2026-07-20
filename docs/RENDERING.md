@@ -15,7 +15,7 @@ selectors, fonts, literal colors, breakpoints, or focus behavior.
 
 The browser adapter must render these primitives: bounded text, facts, lists, tables, result blocks,
 native actions, native menus, and the four diagram forms. A single concrete adapter serves every
-scene in the standalone grid lab. Variation comes from scene plans, not separate rendering
+scene in the standalone lab. Variation comes from scene plans, not separate rendering
 implementations.
 
 After fonts and layout settle, the browser reports rectangles and selected ports keyed by every
@@ -28,42 +28,41 @@ The adapter maps load and click events to declared stable interaction IDs. It mu
 pressed, selected, focus, and expanded state before applying decorative events. It does not invent
 randomness, reorder phases, retarget effects, or let decorative overlays receive pointer events.
 
-## Outcome-tracer geometry adapter
+## Animated-flow adapter
 
-After fonts and layout are ready, the browser reads hero and receipt rectangles in the diagram
-stage's local coordinate space. It selects the bottom-center hero port and top-center receipt port
-and sends both rectangles, ports, and the outcome-text region to WASM. It reruns the tracer after a
-debounced resize. Geometry measurement is browser work; Rust never queries or mutates the DOM.
+The standalone lab renders the curated five-node flow in generated logical order and gives every
+base connector a visible arrow marker. It measures each node rectangle, selects source and target
+ports on the facing boundaries, and returns those measurements to `simulate_scene`; it does not
+derive traversal coordinates independently.
 
-## Simulated result adapter
+Native pressed controls select `SUCCEEDED`, `FAILED`, or `UNKNOWN`, select no disconnect or one
+declared edge, and replay the same generated plan. Outcome selection updates the visible result text
+before simulation. Disconnect selection preserves the base topology but renders a visible gap in the
+selected connector, removes its completion arrow, and identifies the broken endpoints without
+placing that decoration in reading order.
 
-The standalone preview constructs one explicit simulated `SUCCEEDED` result and passes it with
-measured geometry into WASM. It loads no product record, performs no live operation, and defines no
-stable cross-product format. Selecting another disposition keeps the same seed and changes only the
-bounded simulated input.
+The trace overlay projects ordered `edge_traversed` events, one break-local spark, a semantic approval
+role as an `aria-hidden` thumbs-up, and failure displacement only on the terminal's decorative
+backing. `UNKNOWN` adds no terminal cue. When disconnected, no terminal cue is shown even though the
+selected outcome text remains visible. Every decorative layer is `aria-hidden`, pointer-inert, and
+must not obscure labels or controls.
 
-Consumer adapters may supply intentionally published recorded results through the same semantic
-interface, but product records, provenance formats, transport, and classification remain outside the
-standalone Grafik repository. Controls update readable outcome and source text before running the
-decorative profile.
+The plan and trace inspectors expose the complete generated plan, measured state, selected outcome,
+disconnect, and returned events. Replay uses the same plan, seed, geometry, and controls; resize
+remeasures and resimulates rather than regenerating.
 
-## Browser outcome adapter
-
-One absolutely positioned, `aria-hidden` SVG covers the diagram stage. The adapter converts each
-spatial segment into one SVG line. Growth appends lines in event order; retraction removes them from
-the leaf. The SVG uses `pointer-events: none` and never enters panel stacking or reading order.
-
-The adapter consumes the public JSON event vocabulary directly. It maps successful weights and the
-pulse to connector emphasis, applies failure displacement only to a decorative layer behind the
-outcome text, and projects question marks into an `aria-hidden` layer behind the same region. Palette
-roles become theme-aware CSS colors in the browser. It may schedule with browser time, but must not
-reinterpret seeded choices or add ambient randomness.
+The standalone flow uses explicit `simulated` provenance and performs no live operation. Consumer
+adapters may supply intentionally published `recorded` results through the same semantic interface,
+but product records, provenance formats, transport, and classification remain outside Grafik.
+Controls update readable outcome and source text before running the decorative profile.
 
 ## Reduced motion
 
 When `prefers-reduced-motion: reduce` matches, the adapter consumes the complete trace immediately
-and applies its final state. No timer, traversal, pulsing, glitch, or background drift runs. Content,
-panel borders, status text, and the no-JavaScript fallback remain readable without the connector.
+and applies its final readable state. No timer, traversal, spark, pulsing, glitch, or background drift
+runs. A static decorative approval mark may remain, but content never depends on it. Content, base
+connectors, explicit breaks, panel borders, status text, and the no-JavaScript fallback remain
+readable.
 
 ## Accessibility and resilience
 
@@ -71,7 +70,8 @@ panel borders, status text, and the no-JavaScript fallback remain readable witho
 - Generated lists and tables use native elements, headers, and captions from bounded content.
 - Generated actions and menus use native controls with stable accessible names and visible focus.
 - Motion is decorative and hidden from assistive technology.
-- Native buttons expose the three receiver outcomes and state selection with `aria-pressed`.
+- Native buttons expose the three receiver outcomes and disconnect selection with `aria-pressed`.
+- Keyboard users can select an outcome, select or clear one disconnect, and replay the flow.
 - A live status announces the selected result profile or a readable failure.
 - Meaning and reading order remain in HTML; color and motion carry no unique information.
 - Text reflows without horizontal scrolling at 320 CSS px.

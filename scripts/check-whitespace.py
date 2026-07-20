@@ -13,6 +13,8 @@ result = subprocess.run(
 violations: list[str] = []
 for name in result.stdout.splitlines():
     path = Path(name)
+    if not path.is_file():
+        continue
     data = path.read_bytes()
     if b"\0" in data:
         continue
