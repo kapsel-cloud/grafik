@@ -1,6 +1,6 @@
 # Edit a functional board
 
-- **Status:** Ready
+- **Status:** Deferred
 - **Blocked by:** [`0002-pin-conformance-snapshots.md`](0002-pin-conformance-snapshots.md)
 - **Direct owners:** [`../docs/SCOPE.md`](../docs/SCOPE.md),
   [`../docs/ARCHITECTURE.md`](../docs/ARCHITECTURE.md),

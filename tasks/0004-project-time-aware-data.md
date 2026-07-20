@@ -1,6 +1,6 @@
 # Project time-aware data
 
-- **Status:** Ready
+- **Status:** Deferred
 - **Blocked by:** [`0003-edit-a-functional-board.md`](0003-edit-a-functional-board.md)
 - **Direct owners:** [`../docs/ARCHITECTURE.md`](../docs/ARCHITECTURE.md),
   [`../docs/PATTERNS.md`](../docs/PATTERNS.md),

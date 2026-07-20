@@ -1,7 +1,7 @@
 # Pin conformance snapshots
 
-- **Status:** Ready
-- **Blocked by:** None
+- **Status:** Deferred
+- **Blocked by:** [`0010-prove-one-real-consumer-boundary.md`](0010-prove-one-real-consumer-boundary.md)
 - **Direct owners:** [`../docs/SIMULATION.md`](../docs/SIMULATION.md),
   [`../docs/TESTING.md`](../docs/TESTING.md), [`../docs/BUILD.md`](../docs/BUILD.md)
 

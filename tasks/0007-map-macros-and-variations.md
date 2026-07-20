@@ -1,6 +1,6 @@
 # Map macros and variations
 
-- **Status:** Ready
+- **Status:** Deferred
 - **Blocked by:** [`0006-compose-bounded-effect-racks.md`](0006-compose-bounded-effect-racks.md)
 - **Direct owners:** [`../docs/PATTERNS.md`](../docs/PATTERNS.md),
   [`../docs/SIMULATION.md`](../docs/SIMULATION.md),

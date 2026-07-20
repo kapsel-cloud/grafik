@@ -1,6 +1,6 @@
 # Verify the pinned browser matrix
 
-- **Status:** Ready
+- **Status:** Deferred
 - **Blocked by:** [`0008-build-the-functional-board-lab.md`](0008-build-the-functional-board-lab.md)
 - **Direct owners:** [`../docs/RENDERING.md`](../docs/RENDERING.md),
   [`../docs/TESTING.md`](../docs/TESTING.md), [`../docs/BUILD.md`](../docs/BUILD.md)

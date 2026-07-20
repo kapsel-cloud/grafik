@@ -1,6 +1,6 @@
 # Prove seeded receipt scenes in Rust
 
-- **Status:** Active
+- **Status:** Completed
 - **Direct owners:** [`../docs/SCOPE.md`](../docs/SCOPE.md),
   [`../docs/ARCHITECTURE.md`](../docs/ARCHITECTURE.md),
   [`../docs/PATTERNS.md`](../docs/PATTERNS.md),

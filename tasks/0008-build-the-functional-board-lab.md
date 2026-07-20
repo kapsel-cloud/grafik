@@ -1,6 +1,6 @@
 # Build the functional board lab
 
-- **Status:** Ready
+- **Status:** Deferred
 - **Blocked by:** [`0007-map-macros-and-variations.md`](0007-map-macros-and-variations.md)
 - **Direct owners:** [`../docs/ARCHITECTURE.md`](../docs/ARCHITECTURE.md),
   [`../docs/RENDERING.md`](../docs/RENDERING.md),

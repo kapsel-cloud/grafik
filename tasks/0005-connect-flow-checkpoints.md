@@ -1,6 +1,6 @@
 # Connect flow checkpoints
 
-- **Status:** Ready
+- **Status:** Deferred
 - **Blocked by:** [`0004-project-time-aware-data.md`](0004-project-time-aware-data.md)
 - **Direct owners:** [`../docs/PATTERNS.md`](../docs/PATTERNS.md),
   [`../docs/SIMULATION.md`](../docs/SIMULATION.md),

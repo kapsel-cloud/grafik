@@ -1,6 +1,6 @@
 # Compose bounded effect racks
 
-- **Status:** Ready
+- **Status:** Deferred
 - **Blocked by:** [`0005-connect-flow-checkpoints.md`](0005-connect-flow-checkpoints.md)
 - **Direct owners:** [`../docs/ARCHITECTURE.md`](../docs/ARCHITECTURE.md),
   [`../docs/PATTERNS.md`](../docs/PATTERNS.md),
