@@ -17,14 +17,15 @@ here or elsewhere in this public repository.
 
 ## Current route
 
-[`0011-prove-the-animated-flow-tracer.md`](0011-prove-the-animated-flow-tracer.md) is the active
-standalone Grafik packet. It proves one deterministic simulated logical flow with directed animated
-connectors, an explicit disconnect, and decorative outcome reinforcement without a live product
-integration.
+[`0011-prove-the-animated-flow-tracer.md`](0011-prove-the-animated-flow-tracer.md) is complete. It
+proves one deterministic simulated logical flow with directed animated connectors, an explicit
+disconnect, and decorative outcome reinforcement without a live product integration.
 
-[`0012-prove-one-live-kapsel-consumer.md`](0012-prove-one-live-kapsel-consumer.md) is queued behind
-the standalone tracer and the committed Kapsel sandbox consumer. It proves one real downstream
-boundary without moving Kapsel semantics, networking, or authority into Grafik.
+[`0012-prove-one-live-kapsel-consumer.md`](0012-prove-one-live-kapsel-consumer.md) is active. Its
+fixture-consumer slice is accepted against exact public Kapsel, Grafik, and `kapsel.cloud` revisions
+without moving Kapsel semantics, networking, or authority into Grafik. Live acceptance remains
+blocked on KAP-0053 approval of one exact sandbox deployment and a committed `kapsel.cloud`
+connection to that deployment.
 
 [`0010-prove-one-real-consumer-boundary.md`](0010-prove-one-real-consumer-boundary.md) is invalidated:
 its earlier uncommitted completion claim is not supported by the current consumer repository or its
