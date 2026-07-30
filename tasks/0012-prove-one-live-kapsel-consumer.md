@@ -1,14 +1,15 @@
 # Prove one live Kapsel consumer
 
-- **Status:** In progress — fixture-consumer acceptance complete; live acceptance blocked
+- **Status:** Conditional live evidence — fixture-consumer acceptance complete
 - **Fixture acceptance revisions:** Kapsel contract
   `3081b08ad4e9dee8d6db6007d84dfd911997c16e`, Grafik artifact
   `899a429bb6b32d23749ecc6d45c1c70067a3de7d`, and published `kapsel.cloud` fixture implementation
   `2c87f44a73898626b3217ecb7fc1d095fceb6128`
 - **Matching website evidence owner:** the `kapsel.cloud` live run-and-receipt packet; only the
   website owner records the final Grafik acceptance revision
-- **Live acceptance blocked by:** Kapsel's approved KAP-0053 exact sandbox deployment and a committed
-  `kapsel.cloud` connection to that exact deployment
+- **Live acceptance condition:** If Kapsel KAP-0069 selects continuation, its exact selected
+  deployment owner and a committed `kapsel.cloud` connection must pass. If KAP-0069 selects
+  retirement, this packet closes as accepted fixture-consumer evidence.
 - **Direct owners:** [`../docs/SCOPE.md`](../docs/SCOPE.md),
   [`../docs/ARCHITECTURE.md`](../docs/ARCHITECTURE.md),
   [`../docs/RENDERING.md`](../docs/RENDERING.md), [`../docs/TESTING.md`](../docs/TESTING.md), and
@@ -16,12 +17,13 @@
 - **Consumer owner:**
   [`kapsel.cloud` live run-and-receipt packet](https://github.com/kapsel-cloud/kapsel.cloud/blob/master/tasks/0002-prove-the-live-run-and-receipt.md)
 
-## Post-KAP-0053 result target
+## Live result target
 
-After KAP-0053 approves one exact sandbox deployment and the website commits and verifies its exact
-connection, one `kapsel.cloud` consumer will map Kapsel's bounded public sandbox projection into
-Grafik's renderer-neutral scene and trace vocabulary and will present the real run lifecycle without
-giving Grafik product authority. The accepted fixture consumer does not satisfy this live target.
+If KAP-0069 selects continuation, the selected deployment owner must approve one exact public-proof
+service and the website must commit and verify its exact connection before one `kapsel.cloud`
+consumer maps Kapsel's bounded public projection into Grafik's renderer-neutral scene and trace
+vocabulary and presents the real run lifecycle without giving Grafik product authority. The accepted fixture consumer does not
+satisfy this live target.
 
 Grafik will remain independently buildable and useful with simulated inputs. The consumer will own
 the Kapsel protocol client, product semantics, mapping, DOM/SVG/CSS, browser measurement,
@@ -79,6 +81,8 @@ Grafik's public Rust model. No Grafik code opens a network connection or classif
   renderer-neutral trace.
 - Grafik and consumer gates pass independently from exact clean revisions; the consumer verifies the
   pinned artifact and attribution.
+- Grafik live acceptance remains separate evidence and is never a prerequisite for the website's
+  textual public-proof acceptance or launch.
 
 ## Fixture-consumer acceptance evidence
 
@@ -125,8 +129,9 @@ Validation from the exact consumer revision:
 
 This accepts only the committed fixture-consumer slice. It does not accept live transport,
 reconnect against a deployed service, public receipt retrieval, deployment, or public traffic.
-Those remain blocked until KAP-0053 approves one exact sandbox deployment and `kapsel.cloud` commits
-and verifies the exact live connection.
+If KAP-0069 selects continuation, those remain blocked until the selected deployment owner approves
+one exact service and `kapsel.cloud` commits and verifies the exact live connection. If KAP-0069
+selects retirement, no live slice follows and this packet remains accepted fixture-consumer evidence.
 
 ## Non-goals
 
@@ -143,13 +148,14 @@ cargo make check
 ```
 
 Run the consumer repository's complete gate and focused fixture-browser matrix separately; reserve
-live-browser evidence for the post-KAP-0053 connection.
+live-browser evidence for an exact selected deployment connection.
 
 ## Residual risk
 
 The accepted evidence uses committed contract fixtures and one Chromium browser matrix, not a live
-sandbox. KAP-0053 remains queued behind KAP-0052, and no exact website live connection, deployment,
-rollback, public receipt retrieval, or public-traffic evidence exists. Streaming and reconnect may
-still expose a genuine incremental-scene gap; correct only the smallest repeated interface proved by
-the eventual committed live consumer. One consumer does not prove broad compatibility, demand for
-Grafik, or the value of a larger dashboard.
+product proof. KAP-0069 has not selected continuation or retirement, and no exact website live
+connection, deployment, rollback, public receipt retrieval, or public-traffic evidence exists.
+Grafik live evidence is independently useful but cannot block the website's authoritative textual
+proof. Streaming and reconnect may still expose a genuine incremental-scene gap; correct only the
+smallest interface gap proved by an eventual committed live consumer. One consumer does not prove
+broad compatibility, demand for Grafik, or the value of a larger dashboard.

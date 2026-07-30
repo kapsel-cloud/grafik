@@ -21,11 +21,13 @@ here or elsewhere in this public repository.
 proves one deterministic simulated logical flow with directed animated connectors, an explicit
 disconnect, and decorative outcome reinforcement without a live product integration.
 
-[`0012-prove-one-live-kapsel-consumer.md`](0012-prove-one-live-kapsel-consumer.md) is active. Its
-fixture-consumer slice is accepted against exact public Kapsel, Grafik, and `kapsel.cloud` revisions
-without moving Kapsel semantics, networking, or authority into Grafik. Live acceptance remains
-blocked on KAP-0053 approval of one exact sandbox deployment and a committed `kapsel.cloud`
-connection to that deployment.
+[`0012-prove-one-live-kapsel-consumer.md`](0012-prove-one-live-kapsel-consumer.md) is the sole
+conditional consumer route. Its fixture-consumer slice is accepted against exact public Kapsel,
+Grafik, and `kapsel.cloud` revisions without moving Kapsel semantics, networking, or authority into
+Grafik. If Kapsel KAP-0069 retires the hosted proof, this packet closes as accepted fixture-consumer
+evidence. If it selects continuation, live evidence waits for the exact selected deployment owner and
+a committed `kapsel.cloud` connection. Grafik live acceptance is independent and cannot block the
+website's authoritative textual public proof. Grafik receives no unrelated work while blocked.
 
 [`0010-prove-one-real-consumer-boundary.md`](0010-prove-one-real-consumer-boundary.md) is invalidated:
 its earlier uncommitted completion claim is not supported by the current consumer repository or its

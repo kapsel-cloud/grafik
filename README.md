@@ -12,6 +12,9 @@ Pre-release tracer only. The Rust interfaces generate deterministic renderer-neu
 complete timed traces; the included browser adapters are narrow proofs, not stable interfaces or a
 production-ready animation library. Breaking changes are expected between alpha releases.
 
+A downstream fixture consumer has validated Grafik's renderer-neutral integration boundary without
+moving product semantics or networking into the crate. Live integrations remain consumer-owned.
+
 ## Use the alpha
 
 Pin the exact pre-release while the interface is experimental:
